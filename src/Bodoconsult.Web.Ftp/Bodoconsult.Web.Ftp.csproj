@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Deterministic>False</Deterministic>
+		<RepositoryUrl>https://github.com/RobertLeisner/Bodoconsult.Web</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageOutputPath>..\..\packages\</PackageOutputPath>
+		<Copyright>Bodoconsult EDV-Dienstleistungen GmbH</Copyright>
+		<Authors>Robert Leisner</Authors>
+		<VersionPrefix>1.0.0</VersionPrefix>
+		<Version />
+		<PackageId>Bodoconsult.Web.Ftp</PackageId>
+		<Authors>Robert Leisner</Authors>
+		<Company>Bodoconsult EDV-Dienstleistungen GmbH</Company>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>FTP transfer files</PackageTags>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Description>Simple .NET SFTP transfer modul based on SSH</Description>
+		<PackageReleaseNotes>Migration to .NET 8, updated dependencies and add README.md</PackageReleaseNotes>
+		<PackageProjectUrl>https://github.com/RobertLeisner/Bodoconsult.Web.Ftp</PackageProjectUrl>
+		<NeutralLanguage>en</NeutralLanguage>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="SSH.NET" Version="2020.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\..\LICENSE.md" Link="LICENSE.md" />
+		<None Include="..\..\doc\Bodoconsult.Web.Ftp\README.md" Link="README.md" Pack="true" PackagePath="\">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>
