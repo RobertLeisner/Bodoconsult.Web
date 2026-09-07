@@ -1,29 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<Deterministic>false</Deterministic>
-		<RepositoryUrl>https://github.com/RobertLeisner/Bodoconsult.Web</RepositoryUrl>
+
 		<PackageId>Bodoconsult.Web.Html</PackageId>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageOutputPath>..\..\packages\</PackageOutputPath>
-		<Copyright>Bodoconsult EDV-Dienstleistungen GmbH</Copyright>
-		<Authors>Robert Leisner</Authors>
-		<VersionPrefix>1.0.0</VersionPrefix>
-		<Version />
-		<Company>Bodoconsult EDV-Dienstleistungen GmbH</Company>
-		<RepositoryType>git</RepositoryType>
 		<PackageTags>HTML DataTable System.Data markup tags</PackageTags>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>Bodoconsult.Web.Html library contains tools for HTML markup creation like formatting DataTables as HTML etc.</Description>
 		<PackageReleaseNotes>Test migration to .NET 8 and added README.MD</PackageReleaseNotes>
-		<NeutralLanguage>en</NeutralLanguage>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+		<!-- PDB Configuration -->
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<EmbedAllSources>false</EmbedAllSources>
+
+		<!-- Allow PDBs in the main package -->
+		<!--
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>-->
+
+		<!-- Generate symbols package (.snupkg) -->
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<!-- Modern symbols package format -->
 	</PropertyGroup>
 
 

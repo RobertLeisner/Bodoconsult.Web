@@ -47,7 +47,7 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg);
+				Assert.That(erg);
 			}
 
 
@@ -74,7 +74,7 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
+				Assert.That(erg1);
 			}
 
 
@@ -101,7 +101,7 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
+				Assert.That(erg1);
 			}
 
 
@@ -124,7 +124,7 @@ The main class in the library is the class SshHandler with the following methods
 
 				s.Put(localPath, remotePath);
 
-				Assert.IsTrue(s.Exists(remotePath));
+				Assert.That(s.Exists(remotePath));
 
 				// Act
 				s.RemoveFile(remotePath);
@@ -132,8 +132,8 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
-				Assert.IsFalse(erg2);
+				Assert.That(erg1);
+				Assert.That(!erg2);
 			}
 
 
@@ -160,8 +160,8 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
-				Assert.IsFalse(erg2);
+				Assert.That(erg1);
+				Assert.That(!erg2);
 			}
 
 
@@ -181,7 +181,7 @@ The main class in the library is the class SshHandler with the following methods
 				var erg1 = s.IsConnected;
 
 				s.RemoveDirectory(remotePath);
-				Assert.IsFalse(s.Exists(remotePath));
+				Assert.That(!s.Exists(remotePath));
 
 				// Act
 				s.CreateDirectory(remotePath);
@@ -189,8 +189,8 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
-				Assert.IsTrue(erg2);
+				Assert.That(erg1);
+				Assert.That(erg2);
 			}
 
 
@@ -223,10 +223,10 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
-				Assert.IsTrue(erg2.Any());
-				Assert.IsTrue(erg2.Any(x => x.IsDirectory));
-				Assert.IsTrue(erg2.Any(x => !x.IsDirectory));
+				Assert.That(erg1);
+				Assert.That(erg2.Any());
+				Assert.That(erg2.Any(x => x.IsDirectory));
+				Assert.That(erg2.Any(x => !x.IsDirectory));
 			}
 
 
@@ -260,10 +260,10 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				// Assert
-				Assert.IsTrue(erg1);
-				Assert.IsTrue(erg2.Any());
-				Assert.IsTrue(erg2.Any(x => x.IsDirectory));
-				Assert.IsTrue(erg2.Any(x => !x.IsDirectory));
+				Assert.That(erg1);
+				Assert.That(erg2.Any());
+				Assert.That(erg2.Any(x => x.IsDirectory));
+				Assert.That(erg2.Any(x => !x.IsDirectory));
 			}
 
 			[Test]
@@ -295,8 +295,8 @@ The main class in the library is the class SshHandler with the following methods
 				var erg2 = File.Exists(localPath);
 
 				// Assert
-				Assert.IsTrue(erg1);
-				Assert.IsTrue(erg2);
+				Assert.That(erg1);
+				Assert.That(erg2);
 			}
 
 
@@ -324,8 +324,8 @@ The main class in the library is the class SshHandler with the following methods
 				s.Disconnect();
 
 				
-				Assert.IsTrue(erg1);
-				Assert.IsFalse(erg2);
+				Assert.That(erg1);
+				Assert.That(!erg2);
 			}
 
 		}

@@ -4,26 +4,25 @@
 using System;
 using Bodoconsult.Web.Mail.Model;
 
-namespace Bodoconsult.Web.Mail
+namespace Bodoconsult.Web.Mail;
+
+/// <summary>
+/// Base class for simple and mass mailers <see cref="MassSmtpMailer" /> and <see cref="SmtpMailer"/>/>
+/// </summary>
+public abstract class BaseMailer: IDisposable
 {
+
     /// <summary>
-    /// Base class for simple and mass mailers <see cref="MassSmtpMailer" /> and <see cref="SmtpMailer"/>/>
+    /// Current mail account to use
     /// </summary>
-    public abstract class BaseMailer: IDisposable
+    public MailAccount CurrentMailAccount { get; set; }
+
+
+    /// <summary>
+    /// Dispos all needed objects
+    /// </summary>
+    public virtual void Dispose()
     {
-
-        /// <summary>
-        /// Current mail account to use
-        /// </summary>
-        public MailAccount CurrentMailAccount { get; set; }
-
-
-        /// <summary>
-        /// Dispos all needed objects
-        /// </summary>
-        public virtual void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

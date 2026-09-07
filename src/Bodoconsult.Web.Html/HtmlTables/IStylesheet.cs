@@ -3,27 +3,26 @@
 
 //using System.Collections.Generic;
 
-namespace Bodoconsult.Web.Html.HtmlTables
+namespace Bodoconsult.Web.Html.HtmlTables;
+
+public interface IStylesheet
 {
-    public interface IStylesheet
-    {
-        //IDictionary<string, string> Attributes { get; set; }
+    //IDictionary<string, string> Attributes { get; set; }
 
-        string GetStyle(string styleName);
+    string GetStyle(string styleName);
 
-        void CssClassTable(string value);
+    void CssClassTable(string value);
 
-        void CssClassTh(string value);
+    void CssClassTh(string value);
 
-        void CssClassThCenter(string value);
+    void CssClassThCenter(string value);
 
-        void CssClassThRight(string value);
+    void CssClassThRight(string value);
 
-        void CssClassTd(string value);
+    void CssClassTd(string value);
 
-        void CssClassTdCenter(string value);
+    void CssClassTdCenter(string value);
 
-        void CssClassTdRight(string value);
+    void CssClassTdRight(string value);
 
-    }
 }

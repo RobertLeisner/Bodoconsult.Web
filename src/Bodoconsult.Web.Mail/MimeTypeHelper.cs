@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 
-namespace Bodoconsult.Web.Mail
-{
-    public static class MimeTypeHelper
-    {
+namespace Bodoconsult.Web.Mail;
 
-        private static readonly IDictionary<string, string> Mappings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
+public static class MimeTypeHelper
+{
+
+    private static readonly IDictionary<string, string> Mappings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
 
         #region Big freaking list of mime types
         // combination of values from Windows 7 Registry and 
@@ -577,23 +577,22 @@ namespace Bodoconsult.Web.Mail
         {".zip", "application/x-zip-compressed"},
         #endregion
 
-        };
+    };
 
-        public static string GetMimeType(string extension)
+    public static string GetMimeType(string extension)
+    {
+        if (extension == null)
         {
-            if (extension == null)
-            {
-                throw new ArgumentNullException("extension");
-            }
-
-            if (!extension.StartsWith("."))
-            {
-                extension = "." + extension;
-            }
-
-            string mime;
-
-            return Mappings.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
+            throw new ArgumentNullException("extension");
         }
+
+        if (!extension.StartsWith("."))
+        {
+            extension = "." + extension;
+        }
+
+        string mime;
+
+        return Mappings.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
     }
 }

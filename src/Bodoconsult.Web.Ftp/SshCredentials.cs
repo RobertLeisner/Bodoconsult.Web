@@ -1,24 +1,23 @@
-﻿namespace Bodoconsult.Web.Ftp
+﻿namespace Bodoconsult.Web.Ftp;
+
+/// <summary>
+/// Credentials for SFTP login
+/// </summary>
+public class SshCredentials
 {
     /// <summary>
-    /// Credentials for SFTP login
+    /// FTP server address 
     /// </summary>
-    public class SshCredentials
-    {
-        /// <summary>
-        /// FTP server address 
-        /// </summary>
-        public string Url { get; set; }
+    public string Url { get; set; }
 
-        /// <summary>
-        /// Username for the FTP server
-        /// </summary>
-        public string Username { get; set; }
+    /// <summary>
+    /// Username for the FTP server
+    /// </summary>
+    public string Username { get; set; }
 
-        /// <summary>
-        /// Password for the FTP server
-        /// </summary>
-        public string Password { get; set; }
+    /// <summary>
+    /// Password for the FTP server
+    /// </summary>
+    public string Password { get; set; }
 
-    }
 }

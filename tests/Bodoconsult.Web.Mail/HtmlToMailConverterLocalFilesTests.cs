@@ -1,0 +1,202 @@
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Net.Mail;
+using Bodoconsult.Web.Mail.Test.Helpers;
+using Microsoft.Graph.Models;
+using NUnit.Framework;
+
+namespace Bodoconsult.Web.Mail.Test;
+
+[TestFixture]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+public class HtmlToMailConverterLocalFilesTests
+{
+    private readonly string _baseUrl = Path.Combine(TestHelper.TestDataPath, @"HtmlLocalData\");
+    private readonly string _docUrl = Path.Combine(TestHelper.TestDataPath, @"HtmlLocalData\Sample.txt");
+
+    [Test]
+    public void TestLoadDocUrlAndCheckbaseUrlAndLocalFile()
+    {
+        // Arrange
+        // ReSharper disable once UseObjectOrCollectionInitializer
+        var c = new HtmlToMailConverter();
+
+        // Act
+        c.DocUrl = _docUrl;
+
+        // Assert
+        Assert.That(c.BaseUrl==_baseUrl);
+        Assert.That(c.LocalFile);
+
+    }
+
+
+    [Test]
+    public void TestLoadDocument()
+    {
+        // Arrange
+        var c = new HtmlToMailConverter
+        {
+            DocUrl = _docUrl
+        };
+
+        // Act
+        c.LoadDocument();
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(c.Content));
+        Assert.That(c.LocalFile);
+    }
+
+    [Test]
+    public void TestFindImages()
+    {
+        // Arrange
+        var c = new HtmlToMailConverter
+        {
+            DocUrl = _docUrl
+        };
+        c.LoadDocument();
+
+        // Act
+        c.FindImages();
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(c.Content));
+        Assert.That(c.LocalFile);
+        Assert.That(c.Images.Count>0);
+        Assert.That(c.Images[0].Url == _baseUrl+@"logo.jpg");
+    }
+
+    [Test]
+    public void TestGetLinkedRessources()
+    {
+        // Arrange
+        var c = new HtmlToMailConverter
+        {
+            DocUrl = _docUrl
+        };
+        c.LoadDocument();
+        c.FindImages();
+
+        // Act
+            
+        c.GetLinkedRessources();
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(c.Content));
+        Assert.That(c.LocalFile);
+        Assert.That(c.Images.Count > 0);
+        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.LinkedResources.Count>0);
+    }
+
+    [Test]
+    public void TestProcessContent()
+    {
+        // Arrange
+        var c = new HtmlToMailConverter
+        {
+            DocUrl = _docUrl
+        };
+        c.LoadDocument();
+        c.FindImages();
+        c.GetLinkedRessources();
+
+        // Act
+        c.ProcessContent();
+            
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(c.Content));
+        Assert.That(c.LocalFile);
+        Assert.That(c.Images.Count > 0);
+        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.LinkedResources.Count > 0);
+        Assert.That(!c.Content.Contains(".jpg"));
+        Assert.That(c.Content.Contains("cid:"));
+    }
+
+    [Test]
+    public void SaveToMail_ValidMessage_SentViaSmtp()
+    {
+        // Arrange
+        var msg = new MailMessage {From = new MailAddress("noreply@bodoconsult.de")};
+        msg.To.Add( "robert.leisner@bodoconsult.de");
+        msg.Subject = $"Testmail {DateTime.Now:s}";
+
+        var c = new HtmlToMailConverter { DocUrl = _docUrl };
+        c.LoadDocument();
+        c.FindImages();
+        c.GetLinkedRessources();
+        c.ProcessContent();
+
+        var account = TestHelper.GetTestMailAccount();
+
+        // Act
+        c.SaveToMail(ref msg);
+
+
+        var smtp = new SmtpMailer(account);
+
+        smtp.Init();
+        smtp.SendMail(msg);
+        smtp.Dispose();
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(c.Content));
+        Assert.That(c.LocalFile);
+        Assert.That(c.Images.Count > 0);
+        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.LinkedResources.Count > 0);
+        Assert.That(!c.Content.Contains(".jpg"));
+        Assert.That(c.Content.Contains("cid:"));
+        Assert.That(msg.AlternateViews.Count>0);
+        Assert.That(msg.AlternateViews[0].LinkedResources.Count>0);
+    }
+
+    [Test]
+    public void SaveToMail_ValidMessage_SentViaO365()
+    {
+        // Arrange
+        const string to = "robert.leisner@bodoconsult.de";
+
+        var msg = new Message( );
+
+        var receips = to.Split(new[] { ';' }).Select(receiver => new Recipient { EmailAddress = new EmailAddress { Address = receiver } }).ToList();
+
+        msg.ToRecipients = receips;
+        msg.Subject = $"Testmail {DateTime.Now:s}";
+
+        var c = new HtmlToMailConverter { DocUrl = _docUrl };
+        c.LoadDocument();
+        c.FindImages();
+        //c.GetLinkedRessources();
+        c.ProcessContent();
+
+        var account = TestHelper.GetTestO365Account();
+
+        // Act
+        c.SaveToMail(ref msg);
+
+
+        var smtp = new O365Mailer(account);
+
+        smtp.Login();
+        smtp.SendMail(msg);
+        //smtp.Dispose();
+
+        // Assert
+        Assert.That(!string.IsNullOrEmpty(c.Content));
+        Assert.That(c.LocalFile);
+        Assert.That(c.Images.Count > 0);
+        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        //Assert.That(c.LinkedResources.Count > 0);
+        //Assert.That(!c.Content.Contains(".jpg"));
+        //Assert.That(c.Content.Contains("cid:"));
+    }
+}

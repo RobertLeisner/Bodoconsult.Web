@@ -24,7 +24,7 @@ The source code contain a NUnit test classes, the following source code is extra
 
             smtp.SendMail("to@test.de", "Testmail", "dgdgdgdgdgs sfsgdgs sshshsh");
 
-            Assert.IsTrue(true);
+            Assert.That(true);
 
 ## Send a HTML mail
 
