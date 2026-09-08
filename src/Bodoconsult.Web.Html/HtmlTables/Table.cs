@@ -6,23 +6,26 @@ using System.Linq;
 
 namespace Bodoconsult.Web.Html.HtmlTables;
 
+/// <summary>
+/// Table HTMl element
+/// </summary>
 public class Table : BaseElement<RootElement>
 {
-
+    /// <summary>
+    /// Default ctor
+    /// </summary>
     public Table(): base(null)
-    {
-        Rows = new List<TableRow>();
-    }
+    { }
 
-
-    public IList<TableRow> Rows { get; set; }
-
+    /// <summary>
+    /// Rows in the table
+    /// </summary>
+    public List<TableRow> Rows { get; set; } = [];
 
     /// <summary>
     /// Stylesheet for formatting 
     /// </summary>
     public IStylesheet Stylesheet { get; set; }
-
 
     /// <summary>
     /// Render element into an html string
@@ -32,23 +35,23 @@ public class Table : BaseElement<RootElement>
     {
         var type = typeof(TableHeaderCell);
 
-        var content = "";
-        var content1 = Rows.Where(x => x.Cells.Any(y => y.GetType() == type)).Aggregate("", (current, cell) => current + cell.RenderIt());
+        var content = string.Empty;
+        var content1 = Rows.Where(x => x.Cells.Any(y => y.GetType() == type)).Aggregate(string.Empty, (current, cell) => current + cell.RenderIt());
 
         if (!string.IsNullOrEmpty(content1))
         {
-            content += string.Format("\t<thead>\r\n{0}\t</thead>\r\n", content1);
+            content += $"\t<thead>\r\n{content1}\t</thead>\r\n";
         }
 
-        content1 = Rows.Where(x => x.Cells.All(y => y.GetType() != type)).Aggregate("", (current, cell) => current + cell.RenderIt());
+        content1 = Rows.Where(x => x.Cells.All(y => y.GetType() != type)).Aggregate(string.Empty, (current, cell) => current + cell.RenderIt());
 
         if (!string.IsNullOrEmpty(content1))
         {
-            content += string.Format("\t<tbody>\r\n{0}\t</tbody>\r\n", content1);
+            content += $"\t<tbody>\r\n{content1}\t</tbody>\r\n";
         }
 
 
-        var erg = string.Format("\r\n<table{0}>\r\n{1}</table>\r\n", RenderAttributes(this, "table"), content);
+        var erg = $"\r\n<table{RenderAttributes(this, "table")}>\r\n{content}</table>\r\n";
         return erg;
     }
 

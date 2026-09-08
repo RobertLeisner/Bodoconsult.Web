@@ -44,9 +44,8 @@ public class O365Mailer
     /// <returns>Awaitable task</returns>
     public void Login()
     {
-
-        try
-        {
+        //try
+        //{
             //var scopes = new[] { "https://graph.microsoft.com/.default" };
             var tenantId = MailAccount.Tenant;
 
@@ -78,11 +77,11 @@ public class O365Mailer
             //        new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
             //}));
 
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        //}
+        //catch (Exception ex)
+        //{
+        //    throw;
+        //}
     }
 
     /// <summary>

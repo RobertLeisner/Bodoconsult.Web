@@ -3,59 +3,66 @@
 using System;
 using System.Data;
 using System.Globalization;
+using System.Text;
 using Bodoconsult.Web.Html.HtmlTables;
 
 namespace Bodoconsult.Web.Html.Html;
 
+/// <summary>
+/// Format a table
+/// </summary>
 public static class TableFormatter
 {
+    /// <summary>
+    /// Cultur to use for table formatting
+    /// </summary>
+    public static CultureInfo Culture { get; set; } = new("en-us");
 
-    static TableFormatter()
-    {
-        Culture = new CultureInfo("en-us");
-    }
-
-
-    public static CultureInfo Culture { get; set; }
-
-
+    /// <summary>
+    /// Format as CSV text
+    /// </summary>
+    /// <param name="dataTable">Data to format</param>
+    /// <param name="header">True if header with column names should be shown else false</param>
+    /// <returns>CSV formatted string</returns>
     public static string FormatAsCsv(DataTable dataTable, bool header)
     {
-        var erg = "";
+        var erg = new StringBuilder();
+        erg.Append(string.Empty);
 
         if (header)
         {
             foreach (DataColumn column in dataTable.Columns)
             {
-                erg += column.ColumnName + ";";
+                erg.Append($"{column.ColumnName};");
             }
 
             //if (erg.EndsWith(";")) erg = erg.Substring(0, erg.Length - 1);
 
-            erg += "\r\n";
+            erg.Append("\r\n");
         }
-
-
 
         foreach (DataRow row in dataTable.Rows)
         {
-
-            var rowdata = "";
-
             foreach (DataColumn column in dataTable.Columns)
             {
-                rowdata += FormattedValue(column.DataType.Name.ToLower(), row[column.ColumnName].ToString()) + ";";
+                erg.Append($"{FormattedValue(column.DataType.Name.ToLower(), row[column.ColumnName].ToString())};");
             }
 
             //if (rowdata.EndsWith(";")) rowdata = rowdata.Substring(0, rowdata.Length - 1);
 
-            erg += rowdata + "\r\n";
+            erg.Append("\r\n");
         }
 
-
-        return erg;
+        return erg.ToString();
     }
 
+    /// <summary>
+    /// Format as HTML text
+    /// </summary>
+    /// <param name="dataTable">Data to format</param>
+    /// <param name="header">True if header with column names should be shown else false</param>
+    /// <param name="style">Stylesheet</param>
+    /// <returns>HTML formatted string</returns>
     public static string FormatAsHtml(DataTable dataTable, bool header, Stylesheet style)
     {
         var table= new Table();
@@ -65,10 +72,8 @@ public static class TableFormatter
             table.Stylesheet = style;
         }
 
-
         if (header)
         {
-
             var headerRow = new TableRow(table);
 
             foreach (DataColumn column in dataTable.Columns)
@@ -77,8 +82,6 @@ public static class TableFormatter
                 new TableHeaderCell(headerRow) { Text = column.ColumnName };
             }
         }
-
-
 
         foreach (DataRow row in dataTable.Rows)
         {
@@ -91,11 +94,15 @@ public static class TableFormatter
             }
         }
 
-
         return table.RenderIt();
     }
 
-
+    /// <summary>
+    /// Format as HTML text
+    /// </summary>
+    /// <param name="dataTable">Data to format</param>
+    /// <param name="header">True if header with column names should be shown else false</param>
+    /// <returns>HTML formatted string</returns>
     public static string FormatAsHtml(DataTable dataTable, bool header)
     {
         return FormatAsHtml(dataTable, header, null);
@@ -103,7 +110,6 @@ public static class TableFormatter
 
     private static string FormattedValue(string type, string value)
     {
-
         switch (type)
         {
             case "double":

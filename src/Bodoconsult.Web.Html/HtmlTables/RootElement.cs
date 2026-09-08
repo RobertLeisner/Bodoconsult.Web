@@ -3,6 +3,9 @@
 
 namespace Bodoconsult.Web.Html.HtmlTables;
 
+/// <summary>
+/// Root element
+/// </summary>
 public class RootElement
 {
 }

@@ -4,7 +4,6 @@ using System;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
-using System.Text.RegularExpressions;
 using Bodoconsult.Web.Mail.Model;
 
 namespace Bodoconsult.Web.Mail;
@@ -14,13 +13,20 @@ namespace Bodoconsult.Web.Mail;
 /// </summary>
 public sealed class SmtpMailer: BaseMailer
 {
+    private SmtpClient _smtpClient;
+
+    /// <summary>
+    /// Default SMTP mailer
+    /// </summary>
+    /// <param name="currentMailAccount"></param>
     public SmtpMailer(MailAccount currentMailAccount)
     {
         CurrentMailAccount = currentMailAccount;
-        if (string.IsNullOrEmpty(CurrentMailAccount.MailAddressSender)) CurrentMailAccount.MailAddressSender = CurrentMailAccount.SmtpAccountName;
+        if (string.IsNullOrEmpty(CurrentMailAccount.MailAddressSender))
+        {
+            CurrentMailAccount.MailAddressSender = CurrentMailAccount.SmtpAccountName;
+        }
     }
-
-    private SmtpClient _smtpClient;
 
     /// <summary>
     /// Initialize SMTP client before sending a mail
@@ -50,7 +56,6 @@ public sealed class SmtpMailer: BaseMailer
                 EnableSsl = CurrentMailAccount.UseSecureConnection
             };
         }
-
     }
 
     /// <summary>
@@ -61,7 +66,6 @@ public sealed class SmtpMailer: BaseMailer
     /// <param name="body">HTML encoded text to send as mail</param>
     public void SendMail(string to, string subject, string body)
     {
-
         try
         {
             var msg = new MailMessage
@@ -80,13 +84,12 @@ public sealed class SmtpMailer: BaseMailer
         {
             throw new Exception("Smtp mailing error", ex);
         }
-
     }
 
-    private static string StripHtml(string input)
-    {
-        return Regex.Replace(input, "<.*?>", String.Empty);
-    }
+    //private static string StripHtml(string input)
+    //{
+    //    return Regex.Replace(input, "<.*?>", string.Empty);
+    //}
 
     /// <summary>
     /// Send mail based on a <see cref="MailMessage"/> object
@@ -94,9 +97,6 @@ public sealed class SmtpMailer: BaseMailer
     /// <param name="message"></param>
     public void SendMail(MailMessage message)
     {
-
-           
-
         try
         {
             _smtpClient.Send(message);
@@ -105,7 +105,6 @@ public sealed class SmtpMailer: BaseMailer
         {
             throw new Exception("Smtp mailing error", ex);
         }
-
     }
 
     /// <summary>
@@ -122,8 +121,4 @@ public sealed class SmtpMailer: BaseMailer
             // ignored
         }
     }
-
-
-
-
 }
