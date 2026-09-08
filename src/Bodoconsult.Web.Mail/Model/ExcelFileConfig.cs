@@ -1,18 +1,12 @@
-﻿namespace Bodoconsult.Web.Mail.Model;
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
+
+namespace Bodoconsult.Web.Mail.Model;
 
 /// <summary>
 /// Contains config data for Excel import
 /// </summary>
 public sealed class ExcelFileConfig
 {
-
-    public ExcelFileConfig()
-    {
-        EmailAddressColumn = 0;
-        SalutationAddressColumn = 1;
-    }
-
-
     /// <summary>
     /// Path to the data file with addresses to send the file to
     /// </summary>
@@ -28,10 +22,8 @@ public sealed class ExcelFileConfig
     /// </summary>
     public int EmailAddressColumn { get; set; }
 
-
     /// <summary>
     /// Column number of the salutation address column (default: 1 [second column])
     /// </summary>
-    public int SalutationAddressColumn { get; set; }
-
+    public int SalutationAddressColumn { get; set; } = 1;
 }

@@ -84,7 +84,6 @@ internal class PasswordHandlerTests
         var result2 = PasswordHandler.Decrypt(result1);
 
         Assert.That(result2, Is.EqualTo(s));
-
     }
 
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.9.12105.275 stable
+VisualStudioVersion = 18.9.12105.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -26,6 +26,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Pr
 		.editorconfig = .editorconfig
 		..\Bodoconsult.AppInfrastructure\Directory.Build.props = ..\Bodoconsult.AppInfrastructure\Directory.Build.props
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{15AAB994-FD3F-4EFB-8330-33DE932D8FD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BodoWebMailer", "apps\BodoWebMailer\BodoWebMailer.csproj", "{E1D5E376-6DB3-0BE0-2FBE-046897EB2BB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BodoWebMailer.Business", "apps\BodoWebMailer.Business\BodoWebMailer.Business.csproj", "{C4AE4065-50F0-8A37-FFB0-AFE848325204}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BodoWebMailer.Test", "tests\BodoWebMailer\BodoWebMailer.Test.csproj", "{87272ADE-438B-30DF-99CC-C2EB527D90A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +65,18 @@ Global
 		{A908FE60-FCC2-E1C1-8256-BCC59EBF5FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A908FE60-FCC2-E1C1-8256-BCC59EBF5FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A908FE60-FCC2-E1C1-8256-BCC59EBF5FF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1D5E376-6DB3-0BE0-2FBE-046897EB2BB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D5E376-6DB3-0BE0-2FBE-046897EB2BB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D5E376-6DB3-0BE0-2FBE-046897EB2BB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1D5E376-6DB3-0BE0-2FBE-046897EB2BB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4AE4065-50F0-8A37-FFB0-AFE848325204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4AE4065-50F0-8A37-FFB0-AFE848325204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4AE4065-50F0-8A37-FFB0-AFE848325204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4AE4065-50F0-8A37-FFB0-AFE848325204}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87272ADE-438B-30DF-99CC-C2EB527D90A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87272ADE-438B-30DF-99CC-C2EB527D90A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87272ADE-438B-30DF-99CC-C2EB527D90A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87272ADE-438B-30DF-99CC-C2EB527D90A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +88,9 @@ Global
 		{076EC00D-AE4B-7AE5-4FC6-E94A73AF32FE} = {6CA0A540-0D98-4104-99BF-A5952E08B022}
 		{12F287AB-E301-B844-FDC9-B2E036614285} = {6CA0A540-0D98-4104-99BF-A5952E08B022}
 		{A908FE60-FCC2-E1C1-8256-BCC59EBF5FF8} = {6CA0A540-0D98-4104-99BF-A5952E08B022}
+		{E1D5E376-6DB3-0BE0-2FBE-046897EB2BB1} = {15AAB994-FD3F-4EFB-8330-33DE932D8FD1}
+		{C4AE4065-50F0-8A37-FFB0-AFE848325204} = {15AAB994-FD3F-4EFB-8330-33DE932D8FD1}
+		{87272ADE-438B-30DF-99CC-C2EB527D90A9} = {6CA0A540-0D98-4104-99BF-A5952E08B022}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1773B801-60FA-4441-A14F-E26BCF7FFE71}

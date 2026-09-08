@@ -1,17 +1,20 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-
 using System;
 using System.Collections.Generic;
 
 namespace Bodoconsult.Web.Mail;
 
+/// <summary>
+/// Helper class for MIME types
+/// </summary>
 public static class MimeTypeHelper
 {
+    #region Big freaking list of mime types
 
-    private static readonly IDictionary<string, string> Mappings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
-
-        #region Big freaking list of mime types
+    private static readonly Dictionary<string, string> Mappings = new(StringComparer.InvariantCultureIgnoreCase) {
+        
+        
         // combination of values from Windows 7 Registry and 
         // from C:\Windows\System32\inetsrv\config\applicationHost.config
         // some added, including .7z and .dat
@@ -575,24 +578,20 @@ public static class MimeTypeHelper
         {".xwd", "image/x-xwindowdump"},
         {".z", "application/x-compress"},
         {".zip", "application/x-zip-compressed"},
-        #endregion
-
     };
 
+    #endregion
+
+    /// <summary>
+    /// Get a MIME type for a file extension
+    /// </summary>
+    /// <param name="extension">File extension</param>
+    /// <returns>MIME type or null if file extension is not registered</returns>
     public static string GetMimeType(string extension)
     {
-        if (extension == null)
-        {
-            throw new ArgumentNullException("extension");
-        }
+        ArgumentNullException.ThrowIfNull(extension);
 
-        if (!extension.StartsWith("."))
-        {
-            extension = "." + extension;
-        }
-
-        string mime;
-
-        return Mappings.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
+        return Mappings.GetValueOrDefault(extension.StartsWith(".", StringComparison.OrdinalIgnoreCase) ?
+                extension : $".{extension}", "application/octet-stream");
     }
 }

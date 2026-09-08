@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -15,8 +14,10 @@ namespace Bodoconsult.Web.Mail;
 /// </summary>
 public sealed class MassSmtpMailer: BaseMailer
 {
-
-
+    /// <summary>
+    /// Default ctor
+    /// </summary>
+    /// <param name="currentMailAccount">Current mail account</param>
     public MassSmtpMailer(MailAccount currentMailAccount)
     {
         To = new List<MailReceiver>();
@@ -24,24 +25,20 @@ public sealed class MassSmtpMailer: BaseMailer
         CurrentMailAccount = currentMailAccount;
     }
 
-
     /// <summary>
     /// HTML-Body für eMails
     /// </summary>
     public string Body { get; set; }
-
 
     /// <summary>
     /// Subject for the mail
     /// </summary>
     public string Subject { get; set; }
 
-
     /// <summary>
     /// Sending mail address
     /// </summary>
     public string From { get; set; }
-
 
     /// <summary>
     /// Default salutation tu use: default is "Sehr geehrte Damen und Herren"
@@ -71,40 +68,19 @@ public sealed class MassSmtpMailer: BaseMailer
         };
 
         // 1. Send emails to receivers with no salutation
-
         if (To.Any(x => string.IsNullOrEmpty(x.Salutation)))
         {
-            // build the message to send
-            var msg = new MailMessage { From = new MailAddress(From) };
-
-
-            foreach (var mailReciever in To.Where(x => string.IsNullOrEmpty(x.Salutation)))
-            {
-                msg.Bcc.Add(mailReciever.EmailAddress);
-            }
-
-            msg.Subject = Subject;
-            msg.IsBodyHtml = true;
-            msg.BodyEncoding = Encoding.UTF8;
-
-            //string txtBody = "See this email online here: " + messageURL; 
-            //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
-
-            var htmlView = AlternateView.CreateAlternateViewFromString(Body.Replace("??address??", DefaultSalutation), null, "text/html");
-            foreach (var linkedResource in LinkedResources) htmlView.LinkedResources.Add(linkedResource);
-
-            msg.AlternateViews.Add(htmlView);
-
-
-            // Send the mail
-            smtpClient.Send(msg);
-
+            SendWithNoSalutation(smtpClient);
         }
-            
-
-
+        
         // 2. Send emails to receivers with salutation
+        SendWithSalutation(smtpClient);
 
+        smtpClient.Dispose();
+    }
+
+    private void SendWithSalutation(SmtpClient smtpClient)
+    {
         foreach (var mailReciever1 in To.Where(x => !string.IsNullOrEmpty(x.Salutation)))
         {
             var msg = new MailMessage
@@ -129,7 +105,35 @@ public sealed class MassSmtpMailer: BaseMailer
             smtpClient.Send(msg);
                 
         }
+    }
 
-        smtpClient.Dispose();
+    private void SendWithNoSalutation(SmtpClient smtpClient)
+    {
+        // build the message to send
+        var msg = new MailMessage
+        {
+            From = new MailAddress(From)
+        };
+            
+        foreach (var mailReciever in To.Where(x => string.IsNullOrEmpty(x.Salutation)))
+        {
+            msg.Bcc.Add(mailReciever.EmailAddress);
+        }
+
+        msg.Subject = Subject;
+        msg.IsBodyHtml = true;
+        msg.BodyEncoding = Encoding.UTF8;
+
+        //string txtBody = "See this email online here: " + messageURL; 
+        //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
+
+        var htmlView = AlternateView.CreateAlternateViewFromString(Body.Replace("??address??", DefaultSalutation), null, "text/html");
+        foreach (var linkedResource in LinkedResources) htmlView.LinkedResources.Add(linkedResource);
+
+        msg.AlternateViews.Add(htmlView);
+
+
+        // Send the mail
+        smtpClient.Send(msg);
     }
 }

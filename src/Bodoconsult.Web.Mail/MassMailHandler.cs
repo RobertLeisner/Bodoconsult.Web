@@ -1,15 +1,20 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-
 using System;
 using System.Collections.Generic;
 using Bodoconsult.Web.Mail.Model;
 
 namespace Bodoconsult.Web.Mail;
 
+/// <summary>
+/// Mass mail handler
+/// </summary>
 public sealed class MassMailHandler
 {
-
+    /// <summary>
+    /// Default ctor
+    /// </summary>
+    /// <param name="currentMailAccount">Current mail account</param>
     public MassMailHandler(MailAccount currentMailAccount)
     {
         MailReceivers = new List<MailReceiver>();
@@ -35,7 +40,6 @@ public sealed class MassMailHandler
     /// Contains the converted mail text as master
     /// </summary>
     public HtmlToMailConverter MasterMailText { get; set; }
-
 
     /// <summary>
     /// Load mass mail config from Excel sheet (2 columns, email and saluation, at least)
@@ -90,15 +94,10 @@ public sealed class MassMailHandler
         //    };
         //    MailReceivers.Add(m);
         //}
-
-
-
-
     }
 
-
     /// <summary>
-    /// Load a HTML file as mail text
+    /// Load an HTML file as mail text
     /// </summary>
     /// <param name="docUrl"></param>
     public void LoadHtmlMailText(string docUrl)
@@ -116,9 +115,15 @@ public sealed class MassMailHandler
     public void SendMails()
     {
 
-        if (CurrentMailAccount == null) return;
+        if (CurrentMailAccount == null)
+        {
+            return;
+        }
 
-        if (MailReceivers == null || MailReceivers.Count == 0) return;
+        if (MailReceivers == null || MailReceivers.Count == 0)
+        {
+            return;
+        }
 
 
         var m = new MassSmtpMailer(CurrentMailAccount)

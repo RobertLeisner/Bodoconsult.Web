@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-
 using System;
 using System.IO;
 
@@ -58,6 +57,9 @@ public sealed class ImageMetaData
         }
     }
 
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
     /// <summary>
@@ -74,7 +76,6 @@ public sealed class ImageMetaData
     /// Content-ID for the image. Will be created automatically
     /// </summary>
     public string ContentId { get; private set; }
-
 
     /// <summary>
     /// The image file's extension

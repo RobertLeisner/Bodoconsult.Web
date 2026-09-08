@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows10.0.17763</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Templates\HtmlMail.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Templates\HtmlMail.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bodoconsult.App" Version="1.0.9" />
+    <PackageReference Include="Bodoconsult.App.Windows" Version="1.0.9" />
+    <PackageReference Include="Bodoconsult.Database" Version="1.0.0" />
+    <PackageReference Include="Bodoconsult.Database.SqlClient" Version="1.0.0" />
+    <PackageReference Include="log4net" Version="3.4.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.19" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bodoconsult.Web.Html\Bodoconsult.Web.Html.csproj" />
+    <ProjectReference Include="..\..\src\Bodoconsult.Web.Mail\Bodoconsult.Web.Mail.csproj" />
+  </ItemGroup>
+
+</Project>

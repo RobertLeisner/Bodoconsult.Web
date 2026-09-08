@@ -21,8 +21,8 @@ namespace Bodoconsult.Web.Mail;
 [SuppressMessage("ReSharper", "NotResolvedInText")]
 public sealed class HtmlToMailConverter
 {
-    private static readonly HttpClient httpClient = new HttpClient();
-
+    private static readonly HttpClient HttpClient = new();
+    private string _docUrl;
 
     /// <summary>
     /// standard CTOR
@@ -31,12 +31,13 @@ public sealed class HtmlToMailConverter
     {
         Images = new List<ImageMetaData>();
         LinkedResources = new List<LinkedResource>();
-
     }
 
-    private string _docUrl;
+    
 
-
+    /// <summary>
+    /// Document URL
+    /// </summary>
     public string DocUrl
     {
         get => _docUrl;
@@ -57,7 +58,6 @@ public sealed class HtmlToMailConverter
                 //ToDo: Get base url for document
                 throw new NotImplementedException();
             }
-
         }
     }
 
@@ -76,18 +76,15 @@ public sealed class HtmlToMailConverter
     /// </summary>
     public string Content { get; set; }
 
-
     /// <summary>
     /// Contains all found images in the document
     /// </summary>
     public IList<ImageMetaData> Images { get; set; }
 
-
     /// <summary>
     /// Contains all images in the document as <see cref="LinkedResource"/>
     /// </summary>
     public IList<LinkedResource> LinkedResources { get; set; }
-
 
     /// <summary>
     /// Load the file from its location
@@ -113,15 +110,12 @@ public sealed class HtmlToMailConverter
         {
             string pageHtml;
 
-            using var client = new HttpClient();
-
             var cts = new CancellationTokenSource(100000);
 
-            var request = client.GetAsync(DocUrl, cts.Token).GetAwaiter().GetResult();
+            var request = HttpClient.GetAsync(DocUrl, cts.Token).GetAwaiter().GetResult();
 
             using (var stream = request.Content.ReadAsStream())
             {
-
                 if (stream == null)
                 {
                     throw new ArgumentNullException("No response from website!");
@@ -195,7 +189,7 @@ public sealed class HtmlToMailConverter
                 i.LocalFile = true;
                 i.Url = i.OriginalUrl;
             }
-            else if (i.OriginalUrl.ToLower().StartsWith("http"))
+            else if (i.OriginalUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
                 i.LocalFile = false;
                 i.Url = i.OriginalUrl;
@@ -281,9 +275,7 @@ public sealed class HtmlToMailConverter
         }
 
         msg.AlternateViews.Add(htmlView);
-
     }
-
 
     /// <summary>
     /// Store all data from the converter to the mail message

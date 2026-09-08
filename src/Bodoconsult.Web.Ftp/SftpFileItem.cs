@@ -7,7 +7,6 @@ namespace Bodoconsult.Web.Ftp;
 /// </summary>
 public class SftpFileItem
 {
-
     /// <summary>Gets the full path of the directory or file.</summary>
     public string FullName { get; set; }
 
@@ -33,13 +32,11 @@ public class SftpFileItem
     /// </value>
     public DateTime LastAccessTime { get; set; }
 
-
     /// <summary>
     /// Gets or sets the time when the current file or directory was last written to.
     /// </summary>
     /// <value>The time the current file was last written.</value>
     public DateTime LastWriteTime { get; set; }
-
 
     /// <summary>
     /// Gets or sets the time the current file or directory was last accessed.

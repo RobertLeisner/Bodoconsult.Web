@@ -1,4 +1,6 @@
-﻿namespace Bodoconsult.Web.Ftp;
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
+
+namespace Bodoconsult.Web.Ftp;
 
 /// <summary>
 /// Credentials for SFTP login
@@ -19,5 +21,4 @@ public class SshCredentials
     /// Password for the FTP server
     /// </summary>
     public string Password { get; set; }
-
 }
