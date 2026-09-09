@@ -3,9 +3,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using BodoWebMailer.Business.Model;
+using BodoWebMailer.Business.Interfaces;
+using BodoWebMailer.Business.Models;
 
-namespace BodoWebMailer.Business.Service;
+namespace BodoWebMailer.Business.Services;
 
 /// <summary>
 /// Fake implementation for <see cref="IMailService"/>

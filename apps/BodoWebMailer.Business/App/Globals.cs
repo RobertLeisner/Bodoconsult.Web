@@ -1,145 +1,140 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using BodoWebMailer.Business.Helpers;
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
+
+using Bodoconsult.App;
+using Bodoconsult.App.Abstractions.Delegates;
+using Bodoconsult.App.Abstractions.DependencyInjection;
+using Bodoconsult.App.Abstractions.Interfaces;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading;
+using Bodoconsult.Web.Mail.Model;
+using BodoWebMailer.Business.Interfaces;
 
 namespace BodoWebMailer.Business.App;
 
 /// <summary>
-/// Global values for the application and the database schema
+/// App global values
 /// </summary>
-public static class Globals
+public class Globals : IBodoWebMailerGlobals
 {
 
+    #region Singleton factory
 
-
-    #region Public constants
-
-
-
-
-
-    #endregion
-
-
-    #region Public properties
+    // Thread-safe implementation of singleton pattern
+    private static Lazy<Globals> _instance;
 
     /// <summary>
-    /// Tolerated difference value for numeric values being equal
+    /// Get a singleton instance of 
     /// </summary>
-    public static decimal ToleranceValueComparisons { get; set; } = new decimal(0.00000000000001);
-
-
-
-    #endregion
-
-
-
-    #region Public methods
-
-    /// <summary>
-    /// Check if two objects have the same content
-    /// </summary>
-    /// <param name="original">original value in the database</param>
-    /// <param name="current">current value in the entity</param>
     /// <returns></returns>
-    public static bool CheckIfValuesAreEqual(object original, object current)
+    public static Globals Instance
     {
-
-        if (original == current)
+        get
         {
-            return true;
+            try
+            {
+                _instance ??= new Lazy<Globals>(() => new Globals());
+                return _instance.Value;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
         }
-
-        if (original == null)
-        {
-            return current == null;
-        }
-
-        if (original.Equals(current))
-        {
-            return true;
-        }
-
-        if (current == null)
-        {
-            return false;
-        }
-
-
-#pragma warning disable CA1062
-
-        switch (original.GetType().Name.ToUpperInvariant())
-        {
-            case "BYTE[]":
-                return ByteArrayCompare((byte[])original, (byte[])current);
-            case "SINGLE":
-            case "DOUBLE":
-            case "DECIMAL":
-            case "FLOAT":
-                var diff = Math.Abs(Convert.ToDecimal(original, CultureInfo.InvariantCulture) - Convert.ToDecimal(current, CultureInfo.InvariantCulture));
-                return diff < ToleranceValueComparisons;
-            default:
-
-                break;
-        }
-
-#pragma warning restore CA1062
-
-        return false;
     }
-
-    /// <summary>
-    /// Compare two byte arrays
-    /// </summary>
-    /// <param name="a1">Byte array 1 to check</param>
-    /// <param name="a2">Byte array 2 to check</param>
-    /// <returns>true if the arrays are equal</returns>
-    public static bool ByteArrayCompare(IReadOnlyList<byte> a1, IReadOnlyList<byte> a2)
-    {
-        if (a1 == null && a2 == null) return true;
-
-        if (a1 == null) return false;
-        if (a2 == null) return false;
-
-        if (a1.Count != a2.Count)
-            return false;
-
-        // Fastest way to compare arrays: iterate it
-        for (var i = 0; i < a1.Count; i++)
-            if (a1[i] != a2[i])
-                return false;
-
-        return true;
-    }
-
-
-
-
-    /// <summary>
-    /// Current app settings
-    /// </summary>
-    public static AppSettings CurrentAppSettings { get; private set; }
-
-
-
-    /// <summary>
-    /// Load app settings from app directory
-    /// </summary>
-    public static void LoadAppSettings()
-    {
-
-        var path = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
-
-        var fileName = Path.Combine(path, "appSettings.json");
-
-        CurrentAppSettings = JsonHelper.LoadJsonFile<AppSettings>(fileName);
-    }
-
 
     #endregion
 
+    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    public void Dispose()
+    {
+        //throw new NotImplementedException();
+    }
 
+    /// <summary>
+    /// This event is set if the application is started only as singleton
+    /// </summary>
+    public EventWaitHandle EventWaitHandle { get; set; }
+
+    /// <summary>
+    /// App start parameter
+    /// </summary>
+    public IAppStartParameter AppStartParameter { get; set; } = new AppStartParameter();
+
+    /// <summary>
+    /// Current log data entry factory
+    /// </summary>
+    public ILogDataFactory LogDataFactory { get; set; } = new LogDataFactory();
+
+    /// <summary>
+    /// Current logging config
+    /// </summary>
+    public LoggingConfig LoggingConfig { get; set; } = new();
+
+    /// <summary>
+    /// Current app logger. Use this instance only if no DI container is available. Nonetheless, use DiContainer.Get&lt;IAppLoggerProxy&gt; to fetch the default app logger from DI container. Don't forget to load it during DI setup!
+    /// </summary>
+    public IAppLoggerProxy Logger { get; set; }
+
+    /// <summary>
+    /// Current dependency injection (DI) container
+    /// </summary>
+    public DiContainer DiContainer { get; set; } = new();
+
+    /// <summary>
+    /// Delegate called if a fatale app exception has been raised and a message to the UI has to be sent before app terminates
+    /// </summary>
+    public HandleFatalExceptionDelegate HandleFatalExceptionDelegate { get; set; }
+
+    /// <summary>
+    /// Current app storage connection check instance or null
+    /// </summary>
+    public IAppStorageConnectionCheck AppStorageConnectionCheck { get; set; }
+
+    /// <summary>
+    /// Current status message delegate
+    /// </summary>
+    public StatusMessageDelegate StatusMessageDelegate { get; set; }
+
+    /// <summary>
+    /// Current license management delegate
+    /// </summary>
+    public LicenseMissingDelegate LicenseMissingDelegate { get; set; }
+
+    /// <summary>
+    /// Delegate to handle I18N translations
+    /// </summary>
+    public TranslateDelegate TranslateDelegate { get; set; }
+
+    /// <summary>
+    /// Delegate to handle I18N translations with parameters to fill in translated text
+    /// </summary>
+    public TranslateWithParamsDelegate TranslateWithParamsDelegate { get; set; }
+
+    /// <summary>
+    /// Externally registered product name
+    /// </summary>
+    public string ProductName { get; set; }
+
+    /// <summary>
+    /// Externally registered version
+    /// </summary>
+    public string ProductVersion { get; set; }
+
+    /// <summary>
+    /// The current configuration loaded from appsettings.json
+    /// </summary>
+    public IConfigurationRoot ConfigurationRoot { get; set; }
+
+    /// <summary>
+    /// Current mail account
+    /// </summary>
+    public MailAccount CurrentMailAccount { get; set; }
+
+    /// <summary>
+    /// Mail address of the administrator
+    /// </summary>
+    public string AdminMailAddress { get; set; }
 }

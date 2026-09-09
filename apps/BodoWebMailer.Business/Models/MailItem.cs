@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-namespace BodoWebMailer.Business.Model;
+namespace BodoWebMailer.Business.Models;
 
 /// <summary>
 /// Represents data for an email to send

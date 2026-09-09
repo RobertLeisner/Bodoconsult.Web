@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bodoconsult.App" Version="1.0.9" />
     <PackageReference Include="log4net" Version="3.4.0" />
   </ItemGroup>
 

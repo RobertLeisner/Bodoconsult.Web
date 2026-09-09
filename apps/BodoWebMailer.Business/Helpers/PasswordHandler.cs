@@ -260,7 +260,7 @@ public class PasswordHandler
             if (cki.Key == ConsoleKey.Backspace)
             {
                 if (passbits.Count <= 0) continue;
-                Console.SetCursorPosition((Console.CursorLeft - 1), Console.CursorTop);
+                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                 Console.Write(" ");
                 Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                 passbits.Dequeue();

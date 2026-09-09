@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
 using System.Collections.Generic;
-using BodoWebMailer.Business.Model;
+using BodoWebMailer.Business.Models;
 
-namespace BodoWebMailer.Business.Service;
+namespace BodoWebMailer.Business.Interfaces;
 
 /// <summary>
 /// Interface for mail services

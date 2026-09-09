@@ -130,7 +130,7 @@ public sealed class HtmlToMailConverter
         }
         catch (Exception ex)
         {
-            throw new Exception("Error retrieving web file " + DocUrl, ex);
+            throw new Exception($"Error retrieving web file {DocUrl}", ex);
         }
     }
 
@@ -151,7 +151,7 @@ public sealed class HtmlToMailConverter
         }
         catch (Exception ex)
         {
-            throw new Exception("Error retrieving local file " + DocUrl, ex);
+            throw new Exception($"Error retrieving local file {DocUrl}", ex);
         }
     }
 
@@ -248,7 +248,7 @@ public sealed class HtmlToMailConverter
     {
         foreach (var image in Images.OrderByDescending(x => x.Length))
         {             
-            Content = Content.Replace(image.OriginalUrl, "cid:" + image.ContentId);            
+            Content = Content.Replace(image.OriginalUrl, $"cid:{image.ContentId}");            
         }
 
     }

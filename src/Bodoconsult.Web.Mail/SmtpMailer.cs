@@ -45,8 +45,6 @@ public sealed class SmtpMailer: BaseMailer
                 EnableSsl = CurrentMailAccount.UseSecureConnection,
                     
             };
-
-                
         }
         else
         {

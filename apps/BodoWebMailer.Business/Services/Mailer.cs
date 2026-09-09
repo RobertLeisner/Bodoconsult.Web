@@ -1,5 +1,12 @@
 // Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.App.Abstractions.Interfaces;
+using Bodoconsult.App.Zip;
+using Bodoconsult.Web.Mail;
+using Bodoconsult.Web.Mail.Model;
+using BodoWebMailer.Business.Helpers;
+using BodoWebMailer.Business.Interfaces;
+using BodoWebMailer.Business.Models;
 using System;
 using System.IO;
 using System.Linq;
@@ -7,32 +14,39 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Reflection;
 using System.Text;
-using Bodoconsult.App.Zip;
-using Bodoconsult.Web.Mail;
-using Bodoconsult.Web.Mail.Model;
-using BodoWebMailer.Business.Helpers;
-using BodoWebMailer.Business.Model;
-using log4net;
 
-namespace BodoWebMailer.Business;
+namespace BodoWebMailer.Business.Services;
 
-public sealed class Mailer : IDisposable
+/// <summary>
+/// Default implementation of <see cref="IMailer"/>
+/// </summary>
+public sealed class Mailer : IMailer
 {
-    private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
-
-    public Mailer(MailAccount currentMailAccount)
-    {
-        CurrentMailAccount = currentMailAccount;
-    }
-
-    public MailAccount CurrentMailAccount { get; }
-
-
     private SmtpMailer _smtpClient;
-
     private string _htmlMailTemplate;
 
+    private readonly IAppLoggerProxy _appLogger;
+
+    public Mailer(IAppGlobals appGlobals)
+    {
+        if (appGlobals is not IBodoWebMailerGlobals bodoWebMailerGlobals)
+        {
+            throw new ArgumentException("appGlobals is not IBodoWebMailerGlobals");
+        }
+
+        _appLogger = bodoWebMailerGlobals.Logger;
+
+        CurrentMailAccount = bodoWebMailerGlobals.CurrentMailAccount;
+    }
+
+    /// <summary>
+    /// Current mail account
+    /// </summary>
+    public MailAccount CurrentMailAccount { get; }
+
+    /// <summary>
+    /// Init the mail account
+    /// </summary>
     public void Init()
     {
 
@@ -52,7 +66,9 @@ public sealed class Mailer : IDisposable
         _smtpClient.Init();
     }
 
-
+    /// <summary>
+    /// Logon to mailserver
+    /// </summary>
     public void Logon()
     {
 
@@ -106,13 +122,21 @@ public sealed class Mailer : IDisposable
 
     //}
 
+    /// <summary>
+    /// Send a mail item
+    /// </summary>
+    /// <param name="mailItem">Mail item to send</param>
+    /// <returns>True on success else false</returns>
     public bool SendMail(MailItem mailItem)
     {
         //return  string.IsNullOrEmpty(logoPath) ? SendMailPlain(to, subject, body, signatureTemplate, attachments) : SendMailLogo(to, subject, body, logoPath, signatureTemplate, attachments);
 
         //try
         //{
-        if (string.IsNullOrEmpty(CurrentMailAccount.MailAddressSender)) CurrentMailAccount.MailAddressSender = CurrentMailAccount.SmtpAccountName;
+        if (string.IsNullOrEmpty(CurrentMailAccount.MailAddressSender))
+        {
+            CurrentMailAccount.MailAddressSender = CurrentMailAccount.SmtpAccountName;
+        }
 
         var msg = new MailMessage
         {
@@ -130,9 +154,9 @@ public sealed class Mailer : IDisposable
         {
 
             // Plain HTML ink
-            if (mailItem.Logo.ToLowerInvariant().StartsWith("http"))
+            if (mailItem.Logo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                msg.Body = FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, mailItem.Logo);
+                msg.Body = FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, mailItem.Logo, _htmlMailTemplate);
 
             }
             // Local file as logo
@@ -140,7 +164,7 @@ public sealed class Mailer : IDisposable
             {
                 var inlineLogo = new LinkedResource(mailItem.Logo) { ContentId = Guid.NewGuid().ToString() };
 
-                var body = FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, $"cid:{inlineLogo.ContentId}");
+                var body = FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, $"cid:{inlineLogo.ContentId}", _htmlMailTemplate);
                 msg.BodyEncoding = Encoding.UTF8;
 
                 var view = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
@@ -150,13 +174,13 @@ public sealed class Mailer : IDisposable
         }
         else
         {
-            msg.Body = FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, "");
+            msg.Body = FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, string.Empty, _htmlMailTemplate);
         }
 
 
         if (!string.IsNullOrEmpty(mailItem.Attachments))
         {
-            var files = mailItem.Attachments.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var files = mailItem.Attachments.Split([';'], StringSplitOptions.RemoveEmptyEntries);
 
             if (mailItem.Zip)
             {
@@ -180,7 +204,6 @@ public sealed class Mailer : IDisposable
                     msg.Attachments.Add(new Attachment(file));
                 }
             }
-
         }
 
 
@@ -191,8 +214,7 @@ public sealed class Mailer : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.Error(msg, ex);
-
+            _appLogger.LogError("Sending message failed", ex);
             return true;
         }
         //}
@@ -203,28 +225,33 @@ public sealed class Mailer : IDisposable
         //}
     }
 
-
-    ///
-    private string FormatBody(string body, string subject, string signatureTemplate, string logoUrl)
+    /// <summary>
+    /// Format the mail body
+    /// </summary>
+    /// <param name="body">Body text</param>
+    /// <param name="subject">Subject</param>
+    /// <param name="signatureTemplate">Signature template</param>
+    /// <param name="logoUrl">URL of the logo to use or null</param>
+    /// <param name="htmlMailTemplate">HTML mail template</param>
+    /// <returns></returns>
+    public static string FormatBody(string body, string subject, string signatureTemplate, string logoUrl, string htmlMailTemplate)
     {
         ////Do not use string.Format due to { and } in body
         //body = body.Replace("{0}", contentId);
 
-        if (body.Contains("<html") && body.Contains("</html>"))
+        if (body.Contains("<html", StringComparison.OrdinalIgnoreCase) && body.Contains("</html>", StringComparison.OrdinalIgnoreCase))
         {
             return body;
         }
 
-        var signature = (string.IsNullOrEmpty(signatureTemplate)) ? "" : GetTemplate(signatureTemplate).Replace("{0}", logoUrl);
+        var signature = string.IsNullOrEmpty(signatureTemplate) ? "" : GetTemplate(signatureTemplate).Replace("{0}", logoUrl);
 
         //Do not use string.Format due to { and } in body
-        var html = _htmlMailTemplate.Replace("{0}", body + signature).Replace("{1}", subject);
+        var html = htmlMailTemplate.Replace("{0}", body + signature).Replace("{1}", subject);
 
         return html;
-
     }
-
-
+    
     /// <summary>
     /// Get template file as string
     /// </summary>
@@ -249,12 +276,12 @@ public sealed class Mailer : IDisposable
                 return "";
             }
 
-            if (!templateName.EndsWith(".txt"))
+            if (!templateName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
             {
                 templateName = $"{templateName}.txt";
             }
 
-            templateName = Path.Combine(directoryName, "Templates\\" + templateName);
+            templateName = Path.Combine(directoryName, $"Templates\\{templateName}");
 
             var fsIn = new FileStream(templateName, FileMode.Open, FileAccess.Read, FileShare.Read);
             var sr = new StreamReader(fsIn);

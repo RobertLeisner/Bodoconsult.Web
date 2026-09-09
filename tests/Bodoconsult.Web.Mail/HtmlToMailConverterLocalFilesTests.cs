@@ -69,7 +69,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count>0);
-        Assert.That(c.Images[0].Url == _baseUrl+@"logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
         Assert.That(c.LinkedResources.Count>0);
     }
 
@@ -115,7 +115,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
         Assert.That(c.LinkedResources.Count > 0);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
@@ -151,7 +151,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
         Assert.That(c.LinkedResources.Count > 0);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
@@ -194,7 +194,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == _baseUrl + @"logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
         //Assert.That(c.LinkedResources.Count > 0);
         //Assert.That(!c.Content.Contains(".jpg"));
         //Assert.That(c.Content.Contains("cid:"));

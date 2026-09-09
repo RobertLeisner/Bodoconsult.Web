@@ -39,7 +39,7 @@ internal class SshHandlerTests
         // Arrange
         var localPath = TestHelper.FtpTestFilePath;
 
-        const string remotePath = "/"+TestHelper.FtpTestFileName;
+        const string remotePath = $"/{TestHelper.FtpTestFileName}";
 
         var s = new SshHandler(_credentials);
 
@@ -250,7 +250,7 @@ internal class SshHandlerTests
     {
 
         // Arrange
-        var remotePath = "/"+ TestHelper.FtpTestFileName;
+        var remotePath = $"/{TestHelper.FtpTestFileName}";
         var localPath = Path.Combine(TestHelper.LocalTargetPath,"AAA.txt");
 
         var s = new SshHandler(_credentials);

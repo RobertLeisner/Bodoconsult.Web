@@ -1,61 +1,77 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.App.Abstractions.Delegates;
+using Bodoconsult.App.Abstractions.Interfaces;
+using BodoWebMailer.Business.App;
+using BodoWebMailer.Business.Interfaces;
+using BodoWebMailer.Business.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using Bodoconsult.Web.Mail.Model;
-using BodoWebMailer.Business.Model;
-using BodoWebMailer.Business.Service;
-using log4net;
-using Newtonsoft.Json;
 
-namespace BodoWebMailer.Business;
+namespace BodoWebMailer.Business.Services;
 
 /// <summary>
 /// Handles the mails received from a database source
 /// </summary>
-public sealed class MailHandler
+public sealed class MailHandler : IMailHandler
 {
-
-    public event StatusMessage StatusChanged;
-
-    private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
-
-    private readonly Mailer _mailer;
-
+    private readonly IAppLoggerProxy _logger;
+    private readonly IMailer _mailer;
     private readonly IMailService _service;
+    private readonly List<string> _tempFiles = new();
 
-    private readonly IList<string> _tempFiles = new List<string>();
+    /// <summary>
+    /// Delegate for handling status messages for console
+    /// </summary>
+    public StatusMessageDelegate StatusChanged { get; }
 
+    /// <summary>
+    /// Admin mail address
+    /// </summary>
+    public string AdminMailAddress { get; set; }
 
-    public string AdminMailAddress;
-
-    public MailAccount CurrentMailAccount { get; private set; }
-
-    public MailHandler(IMailService service, MailAccount currentMailAccount)
+    /// <summary>
+    /// Default ctor
+    /// </summary>
+    /// <param name="service">Mail provider service</param>
+    /// <param name="mailer">Mailer</param>
+    /// <param name="logger">Current app logger</param>
+    /// <param name="globals">Current app globals</param>
+    public MailHandler(IMailService service, IMailer mailer, IAppLoggerProxy logger, IAppGlobals globals)
     {
         _service = service;
-        CurrentMailAccount = currentMailAccount;
-        _mailer = new Mailer(currentMailAccount);
+        _mailer = mailer;
+        _logger = logger;
+        StatusChanged = globals.StatusMessageDelegate;
+
+        if (globals is not IBodoWebMailerGlobals bodoWebMailerGlobals)
+        {
+            throw new ArgumentException("appGlobals is not IBodoWebMailerGlobals");
+        }
+
+        AdminMailAddress = bodoWebMailerGlobals.AdminMailAddress;
     }
 
-
-
+    /// <summary>
+    /// Start mailing
+    /// </summary>
     public void StartMailing()
     {
         Status("Open database...");
         var mailItems = _service.GetMails();
 
-        if (!mailItems.Any()) return;
+        if (!mailItems.Any())
+        {
+            return;
+        }
 
         _mailer.Init();
 
-
         Status("Database opened...");
-        _logger.Info("database opened");
+        _logger.LogInformation("Database opened");
 
 
         // Mails verarbeiten
@@ -64,7 +80,7 @@ public sealed class MailHandler
             var item = mailItem;
 
             var msg = $"Mail to {item.To}: {item.Subject}";
-            _logger.Info(msg);
+            _logger.LogInformation(msg);
             Status(msg);
 
 
@@ -75,15 +91,23 @@ public sealed class MailHandler
             {
                 var erg = _mailer.SendMail(item);
 
-                if (!erg) _service.ArchiveMail(item);
+                if (!erg)
+                {
+                    _service.ArchiveMail(item);
+                }
 
             }
             catch (Exception ex)
             {
-                msg = "BodoWebMailer:Error:" + item.MailGuid + ":" + msg;
+                msg = $"BodoWebMailer:Error:{item.MailGuid}:{msg}";
 
                 Status(msg);
-                _logger.Error(msg, ex);
+                _logger.LogError(msg, ex);
+
+                if (string.IsNullOrEmpty(AdminMailAddress))
+                {
+                    return;
+                }
 
                 try
                 {
@@ -122,7 +146,7 @@ public sealed class MailHandler
         Status("All mails sent...");
     }
 
-    private void PrepareQueries(MailItem item)
+    public void PrepareQueries(MailItem item)
     {
 
         if (string.IsNullOrEmpty(item.Queries))
@@ -165,12 +189,9 @@ public sealed class MailHandler
             item.Body += content;
     }
 
-    private void Status(string message)
+    public void Status(string message)
     {
         var x = StatusChanged;
         x?.Invoke(message);
     }
-
-
-    public delegate void StatusMessage(string message);
 }

@@ -35,8 +35,7 @@ public class O365Mailer
     /// <summary>
     /// Current O365 mail account
     /// </summary>
-    public O365MailAccount MailAccount  { get;  }
-
+    public O365MailAccount MailAccount { get; }
 
     /// <summary>
     /// Login to O365 Graph API
@@ -44,44 +43,11 @@ public class O365Mailer
     /// <returns>Awaitable task</returns>
     public void Login()
     {
-        //try
-        //{
-            //var scopes = new[] { "https://graph.microsoft.com/.default" };
-            var tenantId = MailAccount.Tenant;
+        var tenantId = MailAccount.Tenant;
 
-            var authenticationProvider = new BaseBearerTokenAuthenticationProvider(new TokenProvider(MailAccount.ClientId, MailAccount.ClientSecret, tenantId));
+        var authenticationProvider = new BaseBearerTokenAuthenticationProvider(new TokenProvider(MailAccount.ClientId, MailAccount.ClientSecret, tenantId));
 
-            _app = new GraphServiceClient(authenticationProvider);
-
-            //// Configure the MSAL client as a confidential client
-            //var confidentialClient = ConfidentialClientApplicationBuilder
-            //    .Create(MailAccount.ClientId)
-            //    .WithAuthority($"https://login.microsoftonline.com/{tenantId}/v2.0")
-            //    .WithClientSecret(MailAccount.ClientSecret)
-            //    .Build();
-
-            // Build the Microsoft Graph client. As the authentication provider, set an async lambda
-            // which uses the MSAL client to obtain an app-only access token to Microsoft Graph,
-            // and inserts this access token in the Authorization header of each API request. 
-
-            //_app = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
-            //{
-
-            //    // Retrieve an access token for Microsoft Graph (gets a fresh token if needed).
-            //    var authResult = await confidentialClient
-            //        .AcquireTokenForClient(scopes)
-            //        .ExecuteAsync();
-
-            //    // Add the access token in the Authorization header of the API request.
-            //    requestMessage.Headers.Authorization =
-            //        new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-            //}));
-
-        //}
-        //catch (Exception ex)
-        //{
-        //    throw;
-        //}
+        _app = new GraphServiceClient(authenticationProvider);
     }
 
     /// <summary>
@@ -166,11 +132,6 @@ internal class TokenProvider : IAccessTokenProvider
             .WithAuthority($"https://login.microsoftonline.com/{_tenantId}/v2.0")
             .WithClientSecret(_clientSecret)
             .Build();
-
-        //var app = ConfidentialClientApplicationBuilder.Create(_clientId)
-        //    .WithClientSecret(_clientSecret)
-        //    .WithAuthority(new Uri($"https://login.microsoftonline.com/{_tenantId}"))
-        //    .Build();
 
         string[] scopes = ["https://graph.microsoft.com/.default"];
 
