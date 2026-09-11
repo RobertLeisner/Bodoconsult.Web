@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen. All rights reserved.
 
 using Bodoconsult.Web.Mail.Helpers;
-using Bodoconsult.Web.Mail.Model;
+using Bodoconsult.Web.Mail.Models;
 using Bodoconsult.Web.Mail.Test.Helpers;
 using NUnit.Framework;
 
-namespace Bodoconsult.Web.Mail.Test;
+namespace Bodoconsult.Web.Mail.Test.Mailers;
 
 internal class MailTestHelperTests
 {

@@ -1,9 +1,13 @@
-﻿namespace Bodoconsult.Web.Mail.Model;
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
+
+using Bodoconsult.Web.Mail.Interfaces;
+
+namespace Bodoconsult.Web.Mail.Models;
 
 /// <summary>
-/// Contains mail config for sending
+/// Contains mail config for sending via SMTP
 /// </summary>
-public sealed class MailAccount
+public sealed class SmtpMailAccount: IMailAccount
 {
     private string _accountName;
 
@@ -26,17 +30,13 @@ public sealed class MailAccount
     /// </summary>
     public string SmtpPassword { get; set; }
 
-
     /// <summary>
     /// Mail address to use for sending 
     /// </summary>
     public string MailAddressSender { get; set; }
 
-
     /// <summary>
     /// Use secured connection via SSL
     /// </summary>
     public bool UseSecureConnection { get; set; }
-
-
 }

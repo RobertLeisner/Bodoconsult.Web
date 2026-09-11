@@ -5,6 +5,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using BodoWebMailer.Business.Helpers;
 using Bodoconsult.Core.Windows.System;
+using Bodoconsult.Web.Mail.Helpers;
 
 namespace BodoWebMailer;
 

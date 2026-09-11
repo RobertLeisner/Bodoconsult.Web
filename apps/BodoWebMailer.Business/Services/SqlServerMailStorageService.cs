@@ -10,16 +10,17 @@ using Bodoconsult.Database.Interfaces;
 using Bodoconsult.Database.SqlClient;
 using Bodoconsult.Web.Html.Html;
 using Bodoconsult.Web.Html.HtmlTables;
+using Bodoconsult.Web.Mail.Helpers;
+using Bodoconsult.Web.Mail.Models;
 using BodoWebMailer.Business.Helpers;
 using BodoWebMailer.Business.Interfaces;
-using BodoWebMailer.Business.Models;
 
 namespace BodoWebMailer.Business.Services;
 
 /// <summary>
 /// Service for mail handling in a SqlServer database
 /// </summary>
-public sealed class DbMailService : IMailService
+public sealed class SqlServerMailStorageService : IMailStorageService
 {
     private readonly IConnManager _db;
 
@@ -27,13 +28,22 @@ public sealed class DbMailService : IMailService
     /// Default ctor
     /// </summary>
     /// <param name="globals">Current app globals</param>
-    public DbMailService(IAppGlobals globals)
+    public SqlServerMailStorageService(IAppGlobals globals)
     {
         _db = SqlClientConnManager.GetConnManager(globals.AppStartParameter.DefaultConnectionString);
 
 #if DEBUG
-        _db.Exec("INSERT INTO [dbo].[tMail] ([M_From],[M_To],[M_Subject],[M_Body]) VALUES ('noreply@bodoconsult.de','test@bodoconsult.de','Test','Testbody')");
+        _db.Exec("INSERT INTO [dbo].[tMail] ([M_From],[M_To],[M_Subject],[M_Body], [M_SignatureTemplate], [M_LogoPath]) VALUES ('noreply@bodoconsult.de','test@bodoconsult.de','Test','Testbody', 'Bodoconsult', 'C:\\Bodoconsult\\Logos\\BodoConsult.gif')");
 #endif
+    }
+
+    /// <summary>
+    /// Get the mail account data from database
+    /// </summary>
+    /// <returns>JSON string with mail account data</returns>
+    public string GetMailAccontData()
+    {
+        return _db.ExecWithResult("SELECT [Value] from dbo.Settings where [skey]='MailAccount';");
     }
 
     /// <summary>

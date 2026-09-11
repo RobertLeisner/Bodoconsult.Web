@@ -3,17 +3,27 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Bodoconsult.Web.Mail.Models;
 using BodoWebMailer.Business.Interfaces;
-using BodoWebMailer.Business.Models;
 
 namespace BodoWebMailer.Business.Services;
 
 /// <summary>
-/// Fake implementation for <see cref="IMailService"/>
+/// Fake implementation for <see cref="IMailStorageService"/>
 /// </summary>
-public sealed class FakeMailService : IMailService
+public sealed class FakeMailStorageService : IMailStorageService
 {
     private readonly List<MailItem> _mailItems  = new();
+
+    /// <summary>
+    /// Get the mail account data from database
+    /// </summary>
+    /// <returns>JSON string with mail account data</returns>
+    public string GetMailAccontData()
+    {
+        // ToDo: make it fakeable
+        return string.Empty;
+    }
 
     /// <summary>
     /// Get all mails to send

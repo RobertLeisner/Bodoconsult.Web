@@ -1,28 +1,33 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.App.Abstractions.Interfaces;
+using Bodoconsult.Web.Mail.Helpers;
+using Bodoconsult.Web.Mail.Interfaces;
+using Bodoconsult.Web.Mail.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
-using Bodoconsult.Web.Mail.Model;
 
-namespace Bodoconsult.Web.Mail;
+namespace Bodoconsult.Web.Mail.Mailers;
 
 /// <summary>
-/// Send a mail to a lot of receivers
+/// Send a mail via SMTP to a lot of receivers
 /// </summary>
-public sealed class MassSmtpMailer: BaseMailer
+public sealed class MassSmtpMailer: BaseMailer, IMassMailer
 {
+    private SmtpMailAccount _currentMailAccount;
+
     /// <summary>
     /// Default ctor
     /// </summary>
-    /// <param name="currentMailAccount">Current mail account</param>
-    public MassSmtpMailer(MailAccount currentMailAccount)
+    /// <param name="logger">Current logger</param>
+    public MassSmtpMailer(IAppLoggerProxy logger): base(logger)
     {
         To = new List<MailReceiver>();
         DefaultSalutation = "Sehr geehrte Damen und Herren";
-        CurrentMailAccount = currentMailAccount;
     }
 
     /// <summary>
@@ -51,20 +56,19 @@ public sealed class MassSmtpMailer: BaseMailer
     public IList<MailReceiver> To { get; set; }
 
     /// <summary>
-    /// Contains all images in the document as <see cref="LinkedResource"/>
+    /// Contains all found images in the document
     /// </summary>
-    public IList<LinkedResource> LinkedResources { get; set; }
+    public IList<ImageMetaData> Images { get; set; }
 
     /// <summary>
     /// Send mail to all mail addresses registered in <see cref="To"/>
     /// </summary>
     public void SendMails()
     {
-
-        var smtpClient = new SmtpClient(CurrentMailAccount.SmtpServer)
+        var smtpClient = new SmtpClient(_currentMailAccount.SmtpServer)
         {
-            Credentials = new NetworkCredential(CurrentMailAccount.SmtpAccountName, CurrentMailAccount.SmtpPassword),
-            EnableSsl = CurrentMailAccount.UseSecureConnection
+            Credentials = new NetworkCredential(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpPassword),
+            EnableSsl = _currentMailAccount.UseSecureConnection
         };
 
         // 1. Send emails to receivers with no salutation
@@ -97,13 +101,26 @@ public sealed class MassSmtpMailer: BaseMailer
             //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
 
             var htmlView = AlternateView.CreateAlternateViewFromString(Body.Replace("??address??", mailReciever1.Salutation), null, "text/html");
-            foreach (var linkedResource in LinkedResources) htmlView.LinkedResources.Add(linkedResource);
-
+            AddImages(Images, htmlView);
             msg.AlternateViews.Add(htmlView);
 
             // Send the mail
             smtpClient.Send(msg);
-                
+        }
+    }
+
+    private static void AddImages(IList<ImageMetaData> images, AlternateView htmlView)
+    {
+        foreach (var image in images)
+        {
+            var imagelink = new LinkedResource(image.Url)
+            {
+                ContentId = image.ContentId,
+                //ContentLink = new Uri("cid:" + image.ContentId),
+                //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
+            };
+
+            htmlView.LinkedResources.Add(imagelink);
         }
     }
 
@@ -128,12 +145,37 @@ public sealed class MassSmtpMailer: BaseMailer
         //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
 
         var htmlView = AlternateView.CreateAlternateViewFromString(Body.Replace("??address??", DefaultSalutation), null, "text/html");
-        foreach (var linkedResource in LinkedResources) htmlView.LinkedResources.Add(linkedResource);
-
+        AddImages(Images, htmlView);
         msg.AlternateViews.Add(htmlView);
-
 
         // Send the mail
         smtpClient.Send(msg);
+    }
+
+    /// <summary>
+    /// Load mail account data from a JSON string
+    /// </summary>
+    /// <param name="json">JSON string with fail account data</param>
+    public override void LoadMailAccount(string json)
+    {
+        var ad = JsonHelper.LoadJsonFromString<SmtpMailAccount>(json);
+        CurrentMailAccount = ad;
+        _currentMailAccount = ad;
+    }
+
+    /// <summary>
+    /// Load mail account
+    /// </summary>
+    /// <param name="mailAccount">Mail account instance</param>
+    public override void LoadMailAccount(IMailAccount mailAccount)
+    {
+        CurrentMailAccount = mailAccount;
+
+        if (mailAccount is not SmtpMailAccount o365)
+        {
+            throw new ArgumentException("mailAccount is not SmtpMailAccount");
+        }
+
+        _currentMailAccount = o365;
     }
 }

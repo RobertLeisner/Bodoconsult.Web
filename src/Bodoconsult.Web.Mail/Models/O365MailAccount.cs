@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-namespace Bodoconsult.Web.Mail.Model;
+using Bodoconsult.Web.Mail.Interfaces;
+
+namespace Bodoconsult.Web.Mail.Models;
 
 /// <summary>
 /// Represents an Office 365 app account used for mailing
 /// </summary>
 /// <remarks>The Office 365 app account requires Azure app permission Mail.Send</remarks>
-public class O365MailAccount
+public class O365MailAccount : IMailAccount
 {
-
     /// <summary>
     /// Current O365 instance
     /// </summary>
@@ -39,4 +40,8 @@ public class O365MailAccount
     /// </summary>
     public string Scope { get; set; }
 
+    /// <summary>
+    /// Mail address to use for sending 
+    /// </summary>
+    public string MailAddressSender { get; set; }
 }

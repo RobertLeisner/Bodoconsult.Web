@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen. All rights reserved.
 
 using Bodoconsult.App.Abstractions.Interfaces;
-using Bodoconsult.Web.Mail.Model;
+using Bodoconsult.Web.Mail.Models;
 
 namespace BodoWebMailer.Business.Interfaces;
 
@@ -13,7 +13,7 @@ public interface IBodoWebMailerGlobals : IAppGlobals
     /// <summary>
     /// Current mail account
     /// </summary>
-    MailAccount CurrentMailAccount { get; set; }
+    SmtpMailAccount CurrentMailAccount { get; set; }
 
     /// <summary>
     /// Mail address of the administrator

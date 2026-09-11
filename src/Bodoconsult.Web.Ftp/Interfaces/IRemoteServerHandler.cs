@@ -56,6 +56,11 @@ public interface IRemoteServerHandler
     /// <param name="remotePath">Remte directory path</param>
     void RemoveDirectory(string remotePath);
 
+    /// <summary>
+    /// Get items in a directory on the remote server
+    /// </summary>
+    /// <param name="remotePath">Remote path to check</param>
+    /// <returns>List of items in the remote path </returns>
     IEnumerable<SftpFileItem> GetDirectoryItems(string remotePath);
 
     /// <summary>

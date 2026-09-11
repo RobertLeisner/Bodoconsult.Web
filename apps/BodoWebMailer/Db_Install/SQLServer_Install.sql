@@ -506,3 +506,50 @@ GRANT INSERT ON dbo.t_Mail TO MailUser
 GO
 
 GRANT INSERT, UPDATE, DELETE, SELECT ON dbo.t_MailArchive TO MailSender
+
+GO
+
+
+GO
+
+CREATE TABLE [dbo].[Settings](
+	[S_ID] [uniqueidentifier] NOT NULL,
+	[sKey] [varchar](255) NOT NULL,
+	[Value] [varchar](max) NULL,
+	[Description] [text] NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY NONCLUSTERED 
+(
+	[S_ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Settings] ADD  CONSTRAINT [DF_Settings_S_ID]  DEFAULT (newid()) FOR [S_ID]
+GO
+
+
+GO
+
+INSERT INTO [dbo].[Settings]
+           ([S_ID]
+           ,[sKey]
+           ,[Value]
+           ,[Description])
+     VALUES
+           (newid()
+           ,'MailAccount'
+           ,'{
+	"$type": "Bodoconsult.Web.Mail.Model.O365MailAccount, Bodoconsult.Web.Mail",
+	"Instance": "Your instance encrypted",
+	"Tenant": "Your tenant encrypted",
+	"ClientId": "Your clientID encrypted",
+	"ClientSecret": "Your client secret encrypted",
+	"UserName": "Your username encrypted",
+	"Scope": "Your scope encrypted"
+}'
+           ,'JSON string with mail acccount object')
+GO
+
+GRANT SELECT ON dbo.Settings TO MailSender
+
+GO

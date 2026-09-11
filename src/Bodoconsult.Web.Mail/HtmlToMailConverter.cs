@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Microsoft.Graph.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,7 +11,6 @@ using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.Graph.Models;
 using LinkedResource = System.Net.Mail.LinkedResource;
 
 namespace Bodoconsult.Web.Mail;
@@ -24,16 +24,11 @@ public sealed class HtmlToMailConverter
     private static readonly HttpClient HttpClient = new();
     private string _docUrl;
 
-    /// <summary>
-    /// standard CTOR
-    /// </summary>
-    public HtmlToMailConverter()
-    {
-        Images = new List<ImageMetaData>();
-        LinkedResources = new List<LinkedResource>();
-    }
-
-    
+    ///// <summary>
+    ///// standard CTOR
+    ///// </summary>
+    //public HtmlToMailConverter()
+    //{ }
 
     /// <summary>
     /// Document URL
@@ -79,12 +74,12 @@ public sealed class HtmlToMailConverter
     /// <summary>
     /// Contains all found images in the document
     /// </summary>
-    public IList<ImageMetaData> Images { get; set; }
+    public IList<ImageMetaData> Images { get; set; } = new List<ImageMetaData>();
 
-    /// <summary>
-    /// Contains all images in the document as <see cref="LinkedResource"/>
-    /// </summary>
-    public IList<LinkedResource> LinkedResources { get; set; }
+    ///// <summary>
+    ///// Contains all images in the document as <see cref="LinkedResource"/>
+    ///// </summary>
+    //public IList<LinkedResource> LinkedResources { get; set; }
 
     /// <summary>
     /// Load the file from its location
@@ -214,32 +209,32 @@ public sealed class HtmlToMailConverter
         }
     }
 
-    /// <summary>
-    /// Load the images as linked ressources (for inclusion in an SMTP mail)
-    /// </summary>
-    public void GetLinkedRessources()
-    {
-        foreach (var image in Images)
-        {
-            if (image.LocalFile)
-            {
+    ///// <summary>
+    ///// Load the images as linked ressources (for inclusion in an SMTP mail)
+    ///// </summary>
+    //public void GetLinkedRessources()
+    //{
+    //    foreach (var image in Images)
+    //    {
+    //        if (image.LocalFile)
+    //        {
 
-                var imagelink = new LinkedResource(image.Url)
-                {
-                    ContentId = image.ContentId,
-                    //ContentLink = new Uri("cid:" + image.ContentId),
-                    //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
-                };
+    //            var imagelink = new LinkedResource(image.Url)
+    //            {
+    //                ContentId = image.ContentId,
+    //                //ContentLink = new Uri("cid:" + image.ContentId),
+    //                //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
+    //            };
 
-                LinkedResources.Add(imagelink);
-            }
-            else
-            {
-                //ToDo: load from web and add to linked ressources
-            }
+    //            LinkedResources.Add(imagelink);
+    //        }
+    //        else
+    //        {
+    //            //ToDo: load from web and add to linked ressources
+    //        }
 
-        }
-    }
+    //    }
+    //}
 
     /// <summary>
     /// Replace image paths with cid:-Tags to include linked ressources
@@ -250,10 +245,7 @@ public sealed class HtmlToMailConverter
         {             
             Content = Content.Replace(image.OriginalUrl, $"cid:{image.ContentId}");            
         }
-
     }
-
-
 
     /// <summary>
     /// Store all data from the converter to the mail message
@@ -269,9 +261,16 @@ public sealed class HtmlToMailConverter
         //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
 
         var htmlView = AlternateView.CreateAlternateViewFromString(Content, null, "text/html");
-        foreach (var linkedResource in LinkedResources)
+        foreach (var image in Images)
         {
-            htmlView.LinkedResources.Add(linkedResource);
+            var imagelink = new LinkedResource(image.Url)
+            {
+                ContentId = image.ContentId,
+                //ContentLink = new Uri("cid:" + image.ContentId),
+                //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
+            };
+
+            htmlView.LinkedResources.Add(imagelink);
         }
 
         msg.AlternateViews.Add(htmlView);

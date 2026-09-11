@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace BodoWebMailer.Business.Helpers;
+namespace Bodoconsult.Web.Mail.Helpers;
 
 /// <summary>
 /// Helper class to handle JSON strings and files
@@ -66,7 +66,7 @@ public class JsonHelper
     }
 
     /// <summary>
-    /// Load a object from a JSON string
+    /// Load an object from a JSON string
     /// </summary>
     /// <param name="json">Fully qualified resource name</param>
     /// <returns>object of type T or null</returns>
@@ -91,7 +91,7 @@ public class JsonHelper
 
         var jsonSerializer = new JsonSerializer
         {
-            Formatting = Formatting.Indented,
+            Formatting = Newtonsoft.Json.Formatting.Indented,
             TypeNameHandling = TypeNameHandling.Objects,
             TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         };
@@ -99,7 +99,7 @@ public class JsonHelper
         jsonSerializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
         using (var jsonWriter = new JsonTextWriter(sw))
         {
-            jsonWriter.Formatting = Formatting.Indented;
+            jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
             jsonWriter.IndentChar = '\t';
             jsonWriter.Indentation = 1;
 
@@ -119,7 +119,6 @@ public class JsonHelper
     /// <returns>JSON string</returns>
     public static string SaveAsFile<T>(string fileName, T data)
     {
-
         var json = SerializeObject(data);
 
         File.WriteAllText(fileName, json, Encoding.UTF8);

@@ -3,10 +3,13 @@
 
 using System;
 using System.IO;
+using Bodoconsult.Web.Mail.Mailers;
+using Bodoconsult.Web.Mail.Models;
+using Bodoconsult.Web.Mail.Test.App;
 using Bodoconsult.Web.Mail.Test.Helpers;
 using NUnit.Framework;
 
-namespace Bodoconsult.Web.Mail.Test;
+namespace Bodoconsult.Web.Mail.Test.Mailers;
 
 [TestFixture]
 public class MassSmtpMailerTests
@@ -14,20 +17,9 @@ public class MassSmtpMailerTests
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     //private readonly string _appPath;
 
-    private string _baseUrl;
+    private string _baseUrl = Path.Combine(TestHelper.TestDataPath, @"TestData\HtmlLocalData\");
 
-    private readonly string _docUrl;
-
-    public MassSmtpMailerTests()
-    {
-            
-        _baseUrl = Path.Combine(TestHelper.TestDataPath, @"TestData\HtmlLocalData\");
-        _docUrl = Path.Combine(TestHelper.TestDataPath, @"TestData\HtmlLocalData\Sample.txt");
-    }
-
-
-
-
+    private readonly string _docUrl = Path.Combine(TestHelper.TestDataPath, @"TestData\HtmlLocalData\Sample.txt");
 
 
     [Test]
@@ -37,21 +29,18 @@ public class MassSmtpMailerTests
         var c = new HtmlToMailConverter { DocUrl = _docUrl };
         c.LoadDocument();
         c.FindImages();
-        c.GetLinkedRessources();
         c.ProcessContent();
-
 
         var account = TestHelper.GetTestMailAccount();
 
-
-        var m = new MassSmtpMailer(account)
+        var m = new MassSmtpMailer(Globals.Instance.Logger)
         {
             From = "noreply@bodoconsult.de",
             Subject = $"Testmail {DateTime.Now:s}",
             Body = c.Content,
-            LinkedResources = c.LinkedResources
+            Images = c.Images
         };
-
+        m.LoadMailAccount(account);
 
         m.To.Add(new MailReceiver { EmailAddress = "robert.leisner@bodoconsult.de" });
         m.To.Add(new MailReceiver { EmailAddress = "info@bodoconsult.de" });

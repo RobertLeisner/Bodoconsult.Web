@@ -1,21 +1,20 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using System;
+using System.IO;
+using System.Threading;
 using Bodoconsult.App;
 using Bodoconsult.App.Abstractions.Delegates;
 using Bodoconsult.App.Abstractions.DependencyInjection;
 using Bodoconsult.App.Abstractions.Interfaces;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Threading;
-using Bodoconsult.Web.Mail.Models;
-using BodoWebMailer.Business.Interfaces;
 
-namespace BodoWebMailer.Business.App;
+namespace Bodoconsult.Web.Mail.Test.App;
 
 /// <summary>
 /// App global values
 /// </summary>
-public class Globals : IBodoWebMailerGlobals
+public class Globals : IAppGlobals
 {
 
     #region Singleton factory
@@ -47,11 +46,25 @@ public class Globals : IBodoWebMailerGlobals
 
     #endregion
 
+    /// <summary>
+    /// Default ctor
+    /// </summary>
+    public Globals()
+    {
+        DataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+        LogfilePath = DataPath;
+    }
+
     /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
     public void Dispose()
     {
         //throw new NotImplementedException();
     }
+
+    /// <summary>
+    /// Is the app started as singleton?
+    /// </summary>
+    public bool IsSingletonApp { get; set; }
 
     /// <summary>
     /// This event is set if the application is started only as singleton
@@ -82,6 +95,28 @@ public class Globals : IBodoWebMailerGlobals
     /// Current dependency injection (DI) container
     /// </summary>
     public DiContainer DiContainer { get; set; } = new();
+
+    /// <summary>
+    /// Base path, where the app stores data created by the app like backups, migrations logs and normal log files.
+    /// </summary>
+    public string DataPath { get; set; }
+
+    /// <summary>
+    /// Folder to store log files. Normally the folder <see cref="DataPath"/> to make log dump creation easier
+    /// </summary>
+    public string LogfilePath { get; set; }
+
+    /// <summary>
+    /// Folder to store migration log files and SQL scripts in. Normally a subfolder of the folder <see cref="DataPath"/> 
+    /// </summary>
+    public string MigrationLogfilePath { get; set; }
+
+    /// <summary>
+    /// Folder to store backups in. Normally a subfolder of the folder <see cref="DataPath"/>
+    /// </summary>
+    public string BackupPath { get; set; }
+
+    public int NumberOfBackupsToKeep { get; set; }
 
     /// <summary>
     /// Delegate called if a fatale app exception has been raised and a message to the UI has to be sent before app terminates
@@ -127,14 +162,4 @@ public class Globals : IBodoWebMailerGlobals
     /// The current configuration loaded from appsettings.json
     /// </summary>
     public IConfigurationRoot ConfigurationRoot { get; set; }
-
-    /// <summary>
-    /// Current mail account
-    /// </summary>
-    public SmtpMailAccount CurrentMailAccount { get; set; }
-
-    /// <summary>
-    /// Mail address of the administrator
-    /// </summary>
-    public string AdminMailAddress { get; set; }
 }

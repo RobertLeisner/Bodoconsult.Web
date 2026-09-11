@@ -1,32 +1,31 @@
-using BodoWebMailer.Business.App;
-using NUnit.Framework;
+//using NUnit.Framework;
 
-namespace BodoWebMailer.Test;
+//namespace BodoWebMailer.Test;
 
-/// <summary>
-/// Test app
-/// </summary>
-[SetUpFixture]
-public class AppSetup
-{
-    /// <summary>
-    /// Load initial data for testing
-    /// </summary>
-    [OneTimeSetUp]
-    public void LoadApp()
-    {
-        GlobalValues.LoadAppSettings();
+///// <summary>
+///// Test app
+///// </summary>
+//[SetUpFixture]
+//public class AppSetup
+//{
+//    /// <summary>
+//    /// Load initial data for testing
+//    /// </summary>
+//    [OneTimeSetUp]
+//    public void LoadApp()
+//    {
+//        GlobalValues.LoadAppSettings();
 
-    }
+//    }
 
 
-    ///// <summary>
-    ///// Unload app
-    ///// </summary>
-    //[OneTimeTearDown]
-    //public void UnloadApp()
-    //{
+//    ///// <summary>
+//    ///// Unload app
+//    ///// </summary>
+//    //[OneTimeTearDown]
+//    //public void UnloadApp()
+//    //{
 
-    //}
+//    //}
 
-}
+//}

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-namespace Bodoconsult.Web.Mail.Model;
+namespace Bodoconsult.Web.Mail.Models;
 
 /// <summary>
 /// Pwd keys infrastructure

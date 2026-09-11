@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.Web.Mail.Helpers;
+
 namespace BodoWebMailer.Business.Helpers;
 
 public class PasswordHelper

@@ -1,0 +1,335 @@
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Bodoconsult.App.Abstractions.Interfaces;
+using Bodoconsult.App.Zip;
+using Bodoconsult.Web.Mail.Helpers;
+using Bodoconsult.Web.Mail.Interfaces;
+using Bodoconsult.Web.Mail.Models;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
+using Microsoft.Graph.Users.Item.SendMail;
+using Microsoft.Identity.Client;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Attachment = Microsoft.Graph.Models.Attachment;
+
+namespace Bodoconsult.Web.Mail.Mailers;
+
+/// <summary>
+/// Implementation of an Office 365 Graph based mailer
+/// </summary>
+public class O365Mailer: BaseMailer
+{
+    // Even if this is a console application here, a daemon application is a confidential client application
+    private GraphServiceClient _app;
+    private O365MailAccount _mailAccount;
+    private readonly string _htmlMailTemplate;
+
+    /// <summary>
+    /// Default ctor
+    /// </summary>
+    /// <param name="logger">Current logger</param>
+    public O365Mailer(IAppLoggerProxy logger) : base(logger)
+    {
+        _htmlMailTemplate = MailHelper.GetTemplate("HtmlMail");
+    }
+
+    /// <summary>
+    /// Login to O365 Graph API
+    /// </summary>
+    /// <returns>Awaitable task</returns>
+    public override void Logon()
+    {
+        var tenantId = _mailAccount.Tenant;
+
+        var authenticationProvider = new BaseBearerTokenAuthenticationProvider(new TokenProvider(_mailAccount.ClientId, _mailAccount.ClientSecret, tenantId));
+
+        _app = new GraphServiceClient(authenticationProvider);
+    }
+
+    /// <summary>
+    /// Send an email over an O365 account
+    /// </summary>
+    /// <param name="to">Mail receiver separated by semmicolon</param>
+    /// <param name="subject">Mail subject</param>
+    /// <param name="content">Mail content with full HTML markup for a webpage</param>
+    public override void SendMail(string to, string subject, string content)
+    {
+        // Define a simple e-mail message.
+        var message = new Message
+        {
+            Subject = subject,
+            Body = new ItemBody
+            {
+                ContentType = BodyType.Html,
+                Content = content
+            },
+        };
+
+        var receips = to.Split([';'] ).Select(receiver => new Recipient { EmailAddress = new EmailAddress { Address = receiver } }).ToList();
+
+        message.ToRecipients = receips;
+
+        // Send mail as the given user. 
+        SendMail(message);
+    }
+
+    /// <summary>
+    /// Send a mail item
+    /// </summary>
+    /// <param name="mailItem">Mail item to send</param>
+    /// <returns>True on error else false</returns>
+    public override bool SendMail(MailItem mailItem)
+    {
+        //return  string.IsNullOrEmpty(logoPath) ? SendMailPlain(to, subject, body, signatureTemplate, attachments) : SendMailLogo(to, subject, body, logoPath, signatureTemplate, attachments);
+
+        //try
+        //{
+
+        //SendMail("robert.leisner@bodoconsult.de", "Test", "Blubb");
+        //return false;
+
+        string content;
+
+        var message = new Message
+        {
+            Subject = mailItem.Subject,
+            //From = GetRecipient(mailItem.From)
+        };
+
+        var receips = mailItem.To.Split([';']).Select(GetRecipient).ToList();
+        message.ToRecipients = receips;
+
+        if (!string.IsNullOrEmpty(mailItem.Logo))
+        {
+            content = AddLogoToContent(mailItem, message, _htmlMailTemplate);
+        }
+        else
+        {
+            content = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, string.Empty, _htmlMailTemplate);
+        }
+
+        //content = "Blubb";
+
+        message.Body = new ItemBody
+        {
+            ContentType = BodyType.Html,
+            Content = content
+        };
+
+        //if (!string.IsNullOrEmpty(mailItem.Attachments))
+        //{
+        //    AddAttachments(mailItem, message);
+        //}
+
+        try
+        {
+            SendMail(message);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("Sending message failed", ex);
+            return true;
+        }
+        //}
+        //catch (Exception e)
+        //{
+        //    _logger.Error("SendMailException", e);
+        //    return true;
+        //}
+    }
+
+    private static string AddLogoToContent(MailItem mailItem, Message message, string htmlMailTemplate)
+    {
+        string content;
+
+        // Plain HTML ink
+        if (mailItem.Logo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            content = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, mailItem.Logo, htmlMailTemplate);
+        }
+        // Local file as logo
+        else
+        {
+            var attachment = new FileAttachment
+            {
+                ContentType = MimeTypeHelper.GetMimeTypeFromFilePath(mailItem.Logo),
+                ContentBytes = File.ReadAllBytes(mailItem.Logo),
+                ContentId = "i0",
+                IsInline = true,
+                Name = "Logo"
+            };
+
+            message.Attachments = [attachment];
+
+            content = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, $"cid:{attachment.ContentId}", htmlMailTemplate);
+        }
+
+        return content;
+    }
+
+    private static Recipient GetRecipient(string address)
+    {
+        return new Recipient
+        {
+            EmailAddress = new EmailAddress
+            {
+                Address = address
+            }
+        };
+    }
+
+    private static void AddAttachments(MailItem mailItem, Message message)
+    {
+        var files = mailItem.Attachments.Split([';'], StringSplitOptions.RemoveEmptyEntries);
+
+        message.Attachments ??= new List<Attachment>(files.Length);
+
+        if (mailItem.Zip)
+        {
+            var zipFileStream = new MemoryStream();
+
+            // Password handling missing
+            var zh = new ZipHandler(files);
+            zh.GenerateZip(zipFileStream);
+
+            var attachment = new FileAttachment
+            {
+                ContentType = "application/zip",
+                ContentId = "i1",
+                Name = "data.zip"
+            };
+
+            zipFileStream.ReadExactly(attachment.ContentBytes);
+
+            message.Attachments.Add(attachment);
+        }
+        else
+        {
+            var i = 1;
+            foreach (var file in files.Where(file => !string.IsNullOrEmpty(file)))
+            {
+                var attachment = new FileAttachment
+                {
+                    ContentType = MimeTypeHelper.GetMimeTypeFromFilePath(file),
+                    ContentId = $"i{i}",
+                    ContentBytes = File.ReadAllBytes(file),
+                    Name = "data.zip"
+                };
+
+                message.Attachments.Add(attachment);
+                i++;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Load mail account data from a JSON string with encrypted values
+    /// </summary>
+    /// <param name="json">JSON string with mail account data</param>
+    public override void LoadMailAccount(string json)
+    {
+        var ad = JsonHelper.LoadJsonFromString<O365MailAccount>(json);
+
+        var ma = new O365MailAccount
+        {
+            UserName = PasswordHandler.Decrypt(ad.UserName),
+            Tenant = PasswordHandler.Decrypt(ad.Tenant),
+            ClientId = PasswordHandler.Decrypt(ad.ClientId),
+            ClientSecret = PasswordHandler.Decrypt(ad.ClientSecret),
+            Instance = PasswordHandler.Decrypt(ad.Instance),
+            Scope = PasswordHandler.Decrypt(ad.Scope)
+        };
+
+        CurrentMailAccount = ma;
+        _mailAccount = ma;
+    }
+
+    /// <summary>
+    /// Load mail account
+    /// </summary>
+    /// <param name="mailAccount">Mail account instance</param>
+    public override void LoadMailAccount(IMailAccount mailAccount)
+    {
+        CurrentMailAccount = mailAccount;
+
+        if (mailAccount is not O365MailAccount o365)
+        {
+            throw new ArgumentException("mailAccount is not O365MailAccount");
+        }
+
+        _mailAccount = o365;
+    }
+
+    /// <summary>
+    /// Send a mail message via O365
+    /// </summary>
+    /// <param name="message">Message to be sent</param>
+    public void SendMail(Message message)
+    {
+        // Send mail as the given user. 
+        _app.Users[_mailAccount.UserName].SendMail.PostAsync(new SendMailPostRequestBody
+        {
+            Message = message,
+        }).GetAwaiter().GetResult();
+    }
+
+}
+
+/// <summary>
+/// Current token provider
+/// </summary>
+internal class TokenProvider : IAccessTokenProvider
+{
+    private readonly string _clientId;
+    private readonly string _clientSecret;
+    private readonly string _tenantId;
+
+    /// <summary>
+    /// Default ctor
+    /// </summary>
+    /// <param name="clientId">Client ID</param>
+    /// <param name="clientSecret">Client secret</param>
+    /// <param name="tenantId">Tenenat ID</param>
+    public TokenProvider(string clientId, string clientSecret, string tenantId)
+    {
+        _clientId = clientId;
+        _clientSecret = clientSecret;
+        _tenantId = tenantId;
+    }
+
+    /// <summary>
+    ///     This method is called by the <see cref="T:Microsoft.Kiota.Abstractions.Authentication.BaseBearerTokenAuthenticationProvider" /> class to get the access token.
+    /// </summary>
+    /// <param name="uri">The target URI to get an access token for.</param>
+    /// <param name="additionalAuthenticationContext">Additional authentication context to pass to the authentication library.</param>
+    /// <param name="cancellationToken">The cancellation token for the task</param>
+    /// <returns>A Task that holds the access token to use for the request.</returns>
+    public Task<string> GetAuthorizationTokenAsync(Uri uri, Dictionary<string, object> additionalAuthenticationContext = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Configure the MSAL client as a confidential client
+        var app = ConfidentialClientApplicationBuilder
+            .Create(_clientId)
+            .WithAuthority($"https://login.microsoftonline.com/{_tenantId}/v2.0")
+            .WithClientSecret(_clientSecret)
+            .Build();
+
+        string[] scopes = ["https://graph.microsoft.com/.default"];
+
+        var result = app.AcquireTokenForClient(scopes).ExecuteAsync(cancellationToken).Result;
+
+        return Task.FromResult(result.AccessToken);
+    }
+
+    /// <summary>
+    /// Returns the <see cref="P:Microsoft.Kiota.Abstractions.Authentication.IAccessTokenProvider.AllowedHostsValidator" /> for the provider.
+    /// </summary>
+    public AllowedHostsValidator AllowedHostsValidator { get; } = new();
+}

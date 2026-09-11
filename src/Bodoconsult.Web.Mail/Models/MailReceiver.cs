@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-namespace Bodoconsult.Web.Mail;
+namespace Bodoconsult.Web.Mail.Models;
 
 /// <summary>
 /// Class with mail receiver data

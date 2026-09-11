@@ -5,11 +5,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using Bodoconsult.Web.Mail.Mailers;
+using Bodoconsult.Web.Mail.Test.App;
 using Bodoconsult.Web.Mail.Test.Helpers;
 using Microsoft.Graph.Models;
 using NUnit.Framework;
 
-namespace Bodoconsult.Web.Mail.Test;
+namespace Bodoconsult.Web.Mail.Test.Converters;
 
 [TestFixture]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -31,9 +33,7 @@ public class HtmlToMailConverterLocalFilesTests
         // Assert
         Assert.That(c.BaseUrl==_baseUrl);
         Assert.That(c.LocalFile);
-
     }
-
 
     [Test]
     public void TestLoadDocument()
@@ -73,29 +73,6 @@ public class HtmlToMailConverterLocalFilesTests
     }
 
     [Test]
-    public void TestGetLinkedRessources()
-    {
-        // Arrange
-        var c = new HtmlToMailConverter
-        {
-            DocUrl = _docUrl
-        };
-        c.LoadDocument();
-        c.FindImages();
-
-        // Act
-            
-        c.GetLinkedRessources();
-
-        // Assert
-        Assert.That(!string.IsNullOrEmpty(c.Content));
-        Assert.That(c.LocalFile);
-        Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
-        Assert.That(c.LinkedResources.Count>0);
-    }
-
-    [Test]
     public void TestProcessContent()
     {
         // Arrange
@@ -105,7 +82,6 @@ public class HtmlToMailConverterLocalFilesTests
         };
         c.LoadDocument();
         c.FindImages();
-        c.GetLinkedRessources();
 
         // Act
         c.ProcessContent();
@@ -116,7 +92,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
         Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
-        Assert.That(c.LinkedResources.Count > 0);
+        ArgumentNullException.ThrowIfNull(c.Content);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
     }
@@ -132,7 +108,6 @@ public class HtmlToMailConverterLocalFilesTests
         var c = new HtmlToMailConverter { DocUrl = _docUrl };
         c.LoadDocument();
         c.FindImages();
-        c.GetLinkedRessources();
         c.ProcessContent();
 
         var account = TestHelper.GetTestMailAccount();
@@ -140,8 +115,8 @@ public class HtmlToMailConverterLocalFilesTests
         // Act
         c.SaveToMail(ref msg);
 
-
-        var smtp = new SmtpMailer(account);
+        var smtp = new SmtpMailer(Globals.Instance.Logger);
+        smtp.LoadMailAccount(account);
 
         smtp.Init();
         smtp.SendMail(msg);
@@ -152,7 +127,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
         Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
-        Assert.That(c.LinkedResources.Count > 0);
+        ArgumentNullException.ThrowIfNull(c.Content);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
         Assert.That(msg.AlternateViews.Count>0);
@@ -167,7 +142,7 @@ public class HtmlToMailConverterLocalFilesTests
 
         var msg = new Message( );
 
-        var receips = to.Split(new[] { ';' }).Select(receiver => new Recipient { EmailAddress = new EmailAddress { Address = receiver } }).ToList();
+        var receips = to.Split([';']  ).Select(receiver => new Recipient { EmailAddress = new EmailAddress { Address = receiver } }).ToList();
 
         msg.ToRecipients = receips;
         msg.Subject = $"Testmail {DateTime.Now:s}";
@@ -184,9 +159,10 @@ public class HtmlToMailConverterLocalFilesTests
         c.SaveToMail(ref msg);
 
 
-        var smtp = new O365Mailer(account);
+        var smtp = new O365Mailer(Globals.Instance.Logger);
+        smtp.LoadMailAccount(account);
 
-        smtp.Login();
+        smtp.Logon();
         smtp.SendMail(msg);
         //smtp.Dispose();
 

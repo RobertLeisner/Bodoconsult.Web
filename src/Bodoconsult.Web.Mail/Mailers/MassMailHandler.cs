@@ -2,29 +2,27 @@
 
 using System;
 using System.Collections.Generic;
-using Bodoconsult.Web.Mail.Model;
+using Bodoconsult.Web.Mail.Interfaces;
+using Bodoconsult.Web.Mail.Models;
 
-namespace Bodoconsult.Web.Mail;
+namespace Bodoconsult.Web.Mail.Mailers;
 
 /// <summary>
 /// Mass mail handler
 /// </summary>
 public sealed class MassMailHandler
 {
+    private readonly IMassMailer _massMailer;
+
     /// <summary>
     /// Default ctor
     /// </summary>
-    /// <param name="currentMailAccount">Current mail account</param>
-    public MassMailHandler(MailAccount currentMailAccount)
+    /// <param name="massMailer">Current mass mailer instance</param>
+    public MassMailHandler(IMassMailer massMailer)
     {
         MailReceivers = new List<MailReceiver>();
-        CurrentMailAccount = currentMailAccount;
+        _massMailer = massMailer;
     }
-
-    /// <summary>
-    /// Contains mail config for sending
-    /// </summary>
-    public MailAccount CurrentMailAccount { get; }
 
     /// <summary>
     /// List of all MailReceivers
@@ -105,7 +103,6 @@ public sealed class MassMailHandler
         MasterMailText = new HtmlToMailConverter { DocUrl = docUrl };
         MasterMailText.LoadDocument();
         MasterMailText.FindImages();
-        MasterMailText.GetLinkedRessources();
         MasterMailText.ProcessContent();
     }
 
@@ -114,33 +111,37 @@ public sealed class MassMailHandler
     /// </summary>
     public void SendMails()
     {
-
-        if (CurrentMailAccount == null)
-        {
-            return;
-        }
-
         if (MailReceivers == null || MailReceivers.Count == 0)
         {
             return;
         }
 
-
-        var m = new MassSmtpMailer(CurrentMailAccount)
-        {
-            From = CurrentMailAccount.MailAddressSender,
-
-            Subject = Subject,
-            Body = MasterMailText.Content,
-            LinkedResources = MasterMailText.LinkedResources
-        };
+        _massMailer.From = _massMailer.CurrentMailAccount.MailAddressSender;
+        _massMailer.Subject = Subject;
+        _massMailer.Body = MasterMailText.Content;
 
         foreach (var receiver in MailReceivers)
         {
-            m.To.Add(receiver);
+            _massMailer.To.Add(receiver);
         }
 
-        m.SendMails();
+        _massMailer.SendMails();
 
+
+        //var m = new MassSmtpMailer(CurrentMailAccount)
+        //{
+        //    From = CurrentMailAccount.MailAddressSender,
+
+        //    Subject = Subject,
+        //    Body = MasterMailText.Content,
+        //    LinkedResources = MasterMailText.LinkedResources
+        //};
+
+        //foreach (var receiver in MailReceivers)
+        //{
+        //    m.To.Add(receiver);
+        //}
+
+        //m.SendMails();
     }
 }

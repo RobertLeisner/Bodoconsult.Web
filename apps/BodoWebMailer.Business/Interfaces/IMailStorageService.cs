@@ -1,15 +1,21 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
 using System.Collections.Generic;
-using BodoWebMailer.Business.Models;
+using Bodoconsult.Web.Mail.Models;
 
 namespace BodoWebMailer.Business.Interfaces;
 
 /// <summary>
-/// Interface for mail services
+/// Interface for mail storage services
 /// </summary>
-public interface IMailService
+public interface IMailStorageService
 {
+    /// <summary>
+    /// Get the mail account data from database
+    /// </summary>
+    /// <returns>JSON string with mail account data</returns>
+    string GetMailAccontData();
+
     /// <summary>
     /// Get all mails to send
     /// </summary>
@@ -54,5 +60,4 @@ public interface IMailService
     /// Clear all mail items
     /// </summary>
     void ClearMailItems();
-
 }

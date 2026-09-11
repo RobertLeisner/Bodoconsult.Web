@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
 using System.Net.Mail;
+using Bodoconsult.Web.Mail.Mailers;
+using Bodoconsult.Web.Mail.Test.App;
 using Bodoconsult.Web.Mail.Test.Helpers;
 using NUnit.Framework;
 
-namespace Bodoconsult.Web.Mail.Test;
+namespace Bodoconsult.Web.Mail.Test.Mailers;
 
 [TestFixture]
 public class SmtpMailerTests
@@ -12,10 +14,10 @@ public class SmtpMailerTests
     [Test]
     public void TestSendMailPlainMail()
     {
-
         var account = TestHelper.GetTestMailAccount();
 
-        var smtp = new SmtpMailer(account);
+        var smtp = new SmtpMailer(Globals.Instance.Logger);
+        smtp.LoadMailAccount(account);
         smtp.Init();
 
         smtp.SendMail(TestHelper.GetTestReceiver(), "Testmail", "dgdgdgdgdgs sfsgdgs sshshsh");
@@ -27,7 +29,6 @@ public class SmtpMailerTests
     public void TestSendMailMessage()
     {
         var account = TestHelper.GetTestMailAccount();
-
 
         // New message as HTML mail
         var msg = new MailMessage {IsBodyHtml = true};
@@ -45,7 +46,8 @@ public class SmtpMailerTests
         msg.Body = "<p>ajHA SADad asd AS Ddad</p>";
 
         // Send the mail
-        var smtp = new SmtpMailer(account);
+        var smtp = new SmtpMailer(Globals.Instance.Logger);
+        smtp.LoadMailAccount(account);
         smtp.Init();
 
         smtp.SendMail(msg);

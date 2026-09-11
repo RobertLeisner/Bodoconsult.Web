@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Bodoconsult.Web.Mail.Helpers;
-using Bodoconsult.Web.Mail.Model;
+using Bodoconsult.Web.Mail.Models;
 using NUnit.Framework;
 
 namespace Bodoconsult.Web.Mail.Test.Helpers;
@@ -89,12 +89,12 @@ public static class TestHelper
     /// Get a test mail account. Adjust path to your current situation
     /// </summary>
     /// <returns></returns>
-    public static MailAccount GetTestMailAccount()
+    public static SmtpMailAccount GetTestMailAccount()
     {
 
         var fileName = Path.Combine(_secretsPath, "BodoWebMailer.json");
 
-        var account = JsonHelper.LoadJsonFile<MailAccount>(fileName);
+        var account = JsonHelper.LoadJsonFile<SmtpMailAccount>(fileName);
 
         return account;
     }

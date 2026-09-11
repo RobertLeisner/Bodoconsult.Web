@@ -2,11 +2,11 @@
 
 using Bodoconsult.App;
 using Bodoconsult.App.Abstractions.Interfaces;
-using Bodoconsult.Web.Mail.Model;
 using BodoWebMailer.Business.Interfaces;
 using BodoWebMailer.DiContainerProvider;
 using System;
 using System.Runtime.Versioning;
+using Bodoconsult.Web.Mail.Models;
 
 namespace BodoWebMailer;
 
@@ -51,7 +51,7 @@ public class BodoWebMailerAppBuilder: BaseAppBuilder
         var section = root.GetSection("CurrentMailAccount");
 
         // Get your derived IAppGlobals instance here to access added properties
-        var ma = new MailAccount();
+        var ma = new SmtpMailAccount();
 
         // Now get the requested config elements out of the root config element
         ma.SmtpServer = DefaultAppStartProvider.ReadStringProperty(section, "SmtpServer", string.Empty);

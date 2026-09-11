@@ -13,6 +13,8 @@ using BodoWebMailer.Business.Services;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Runtime.Versioning;
+using Bodoconsult.Web.Mail.Interfaces;
+using Bodoconsult.Web.Mail.Mailers;
 
 namespace BodoWebMailer.DiContainerProvider;
 
@@ -65,8 +67,8 @@ public class BodoWebMailerAllServicesContainerServiceProvider : IDiContainerServ
         diContainer.AddSingleton<IGeneralAppManagementManager, GeneralAppManagementManager>();
 
         // Services
-        diContainer.AddSingleton<IMailService, DbMailService>();
-        diContainer.AddSingleton<IMailer, Mailer>();
+        diContainer.AddSingleton<IMailStorageService, SqlServerMailStorageService>();
+        diContainer.AddSingleton<IMailer, O365Mailer>();
         diContainer.AddSingleton<IMailHandler, MailHandler>();
 
         // Load all other services required for the app now

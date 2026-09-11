@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Bodoconsult.Web.Mail;
 
@@ -593,5 +594,23 @@ public static class MimeTypeHelper
 
         return Mappings.GetValueOrDefault(extension.StartsWith(".", StringComparison.OrdinalIgnoreCase) ?
                 extension : $".{extension}", "application/octet-stream");
+    }
+
+    /// <summary>
+    /// Get a MIME type for a file path
+    /// </summary>
+    /// <param name="path">File path</param>
+    /// <returns>MIME type or null if file extension is not registered</returns>
+    public static string GetMimeTypeFromFilePath(string path)
+    {
+        var extension = new FileInfo(path).Extension;
+
+        if (string.IsNullOrEmpty(extension))
+        {
+            return "application/octet-stream";
+        }
+
+        return Mappings.GetValueOrDefault(extension.StartsWith(".", StringComparison.OrdinalIgnoreCase) ?
+            extension : $".{extension}", "application/octet-stream");
     }
 }

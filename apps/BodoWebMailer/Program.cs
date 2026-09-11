@@ -2,38 +2,20 @@
 
 using Bodoconsult.App.Abstractions.Interfaces;
 using Bodoconsult.App.Helpers;
-using BodoWebMailer.Business;
 using BodoWebMailer.Business.App;
-using log4net;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using Bodoconsult.App.Extensions;
-using BodoWebMailer.Business.Services;
 
 namespace BodoWebMailer;
 
-[SupportedOSPlatform("windows10.0")]
+[SupportedOSPlatform("windows10.0.17763.0")]
 internal class Program
 {
-
-    private static readonly ILog Logger;
-
     private static int Main(string[] args)
     {
-        //XmlDocument log4netConfig = new XmlDocument();
-        //log4netConfig.Load(File.OpenRead("log4net.config"));
-
-        //var repo = LogManager.CreateRepository(
-        //    Assembly.GetEntryAssembly(), typeof(log4net.Repository.Hierarchy.Hierarchy));
-
-        //XmlConfigurator.Configure(repo, log4netConfig["log4net"]);
-
-        //Logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType.Name);
-
-        //Logger.Info("Starts...");
-
         if (args.Length > 0)
         {
             switch (args[0])
@@ -44,7 +26,6 @@ internal class Program
                 default:
                     break;
             }
-
         }
 
         Debug.Print("Hello, World!");
@@ -111,37 +92,6 @@ internal class Program
         builder.StartApplication();
 
         Environment.Exit(0);
-
-
-
-        //// Load configuration
-        ////var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-        ////XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
-
-        //Status("BodoWebMailer started...");
-
-        //GlobalValues.LoadAppSettings();
-        //var appSettings = GlobalValues.CurrentAppSettings;
-
-        ////log4net.Config.BasicConfigurator.Configure();
-
-
-
-        //Status(appSettings.ConnectionString);
-
-
-        //ShowStatus("Get mails to send...");
-        //var mailhandler = new MailHandler(new DbMailService(appSettings.ConnectionString), appSettings.CurrentMailAccount)
-        //{
-        //    AdminMailAddress = appSettings.AdminMailAddress,
-        //};
-
-        //mailhandler.StatusChanged += ShowStatus;
-        //mailhandler.StartMailing();
-        //ShowStatus("Mails sent. Program quits...");
-
-        ////Logger.Info("Done!");
-
         return 0;
     }
 

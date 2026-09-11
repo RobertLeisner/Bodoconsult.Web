@@ -2,14 +2,14 @@
 
 using Bodoconsult.App.Abstractions.Delegates;
 using Bodoconsult.App.Abstractions.Interfaces;
-using BodoWebMailer.Business.App;
 using BodoWebMailer.Business.Interfaces;
-using BodoWebMailer.Business.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Bodoconsult.Web.Mail.Interfaces;
+using Bodoconsult.Web.Mail.Models;
 
 namespace BodoWebMailer.Business.Services;
 
@@ -20,7 +20,7 @@ public sealed class MailHandler : IMailHandler
 {
     private readonly IAppLoggerProxy _logger;
     private readonly IMailer _mailer;
-    private readonly IMailService _service;
+    private readonly IMailStorageService _service;
     private readonly List<string> _tempFiles = new();
 
     /// <summary>
@@ -40,7 +40,7 @@ public sealed class MailHandler : IMailHandler
     /// <param name="mailer">Mailer</param>
     /// <param name="logger">Current app logger</param>
     /// <param name="globals">Current app globals</param>
-    public MailHandler(IMailService service, IMailer mailer, IAppLoggerProxy logger, IAppGlobals globals)
+    public MailHandler(IMailStorageService service, IMailer mailer, IAppLoggerProxy logger, IAppGlobals globals)
     {
         _service = service;
         _mailer = mailer;
@@ -61,6 +61,14 @@ public sealed class MailHandler : IMailHandler
     public void StartMailing()
     {
         Status("Open database...");
+
+        var json = _service.GetMailAccontData();
+        _mailer.LoadMailAccount(json);
+        Status("Mail config loaded...");
+
+
+        Status("Get mails...");
+
         var mailItems = _service.GetMails();
 
         if (!mailItems.Any())
@@ -68,11 +76,20 @@ public sealed class MailHandler : IMailHandler
             return;
         }
 
+        Status($"Got {mailItems.Count} mails...");
+        _logger.LogInformation("Got mails");
+
+        // Init the mailer
         _mailer.Init();
 
-        Status("Database opened...");
-        _logger.LogInformation("Database opened");
+        // Login to mail server
+        _mailer.Logon();
 
+        Status($"Logged to mail server...");
+        _logger.LogInformation("Logged to mail server");
+
+
+        Status($"Start mail processing...");
 
         // Mails verarbeiten
         foreach (var mailItem in mailItems)

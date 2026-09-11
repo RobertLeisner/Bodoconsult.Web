@@ -1,15 +1,16 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH.  All rights reserved.
 
-using System;
-using System.Diagnostics;
-using System.Threading;
 using Bodoconsult.App.Abstractions.Delegates;
 using Bodoconsult.App.Abstractions.Interfaces;
 using Bodoconsult.App.BusinessTransactions.Replies;
 using Bodoconsult.App.BusinessTransactions.RequestData;
 using Bodoconsult.App.Helpers;
 using Bodoconsult.App.Interfaces;
+using Bodoconsult.Web.Mail.Helpers;
 using BodoWebMailer.Business.Interfaces;
+using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace BodoWebMailer.Business.App;
 
@@ -73,6 +74,11 @@ public class BodoWebMailerService : IApplicationService
         _isStarting = false;
 
         // Do start your workload here
+        PasswordHandler.Key1 = "Mail2020";
+        PasswordHandler.Key2 = "2020Mail";
+        PasswordHandler.Key3 = "20Mail20";
+        PasswordHandler.Salt = [0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76];
+        
         var mh = AppGlobals.DiContainer.Get<IMailHandler>();
         mh.StartMailing();
 
