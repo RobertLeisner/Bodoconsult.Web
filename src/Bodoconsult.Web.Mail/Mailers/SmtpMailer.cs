@@ -1,17 +1,18 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.App.Abstractions.Interfaces;
+using Bodoconsult.App.Zip;
+using Bodoconsult.Web.Mail.Helpers;
+using Bodoconsult.Web.Mail.Interfaces;
+using Bodoconsult.Web.Mail.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
-using Bodoconsult.App.Abstractions.Interfaces;
-using Bodoconsult.App.Zip;
-using Bodoconsult.Web.Mail.Helpers;
-using Bodoconsult.Web.Mail.Interfaces;
-using Bodoconsult.Web.Mail.Models;
 
 namespace Bodoconsult.Web.Mail.Mailers;
 
@@ -207,6 +208,99 @@ public sealed class SmtpMailer: BaseMailer
         //    _logger.Error("SendMailException", e);
         //    return true;
         //}
+    }
+
+    /// <summary>
+    /// Send mail to all mail addresses registered in <see cref="MassMailItem"/>
+    /// </summary>
+    /// <param name="massMailItem">Mass mail item</param>
+    public override void SendMails(MassMailItem massMailItem)
+    {
+        var smtpClient = new SmtpClient(_currentMailAccount.SmtpServer)
+        {
+            Credentials = new NetworkCredential(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpPassword),
+            EnableSsl = _currentMailAccount.UseSecureConnection
+        };
+
+        // 1. Send emails to receivers with no salutation
+        if (massMailItem.To.Any(x => string.IsNullOrEmpty(x.Salutation)))
+        {
+            SendWithNoSalutation(massMailItem, smtpClient);
+        }
+
+        // 2. Send emails to receivers with salutation
+        SendWithSalutation(massMailItem, smtpClient);
+
+        smtpClient.Dispose();
+    }
+
+    private void SendWithSalutation(MassMailItem massMailItem, SmtpClient smtpClient)
+    {
+        foreach (var mailReciever1 in massMailItem.To.Where(x => !string.IsNullOrEmpty(x.Salutation)))
+        {
+            var msg = new MailMessage
+            {
+                From = new MailAddress(massMailItem.From),
+                Subject = massMailItem.Subject,
+                IsBodyHtml = true,
+                BodyEncoding = Encoding.UTF8
+            };
+
+            msg.Bcc.Add(mailReciever1.EmailAddress);
+
+            //string txtBody = "See this email online here: " + messageURL; 
+            //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
+
+            var htmlView = AlternateView.CreateAlternateViewFromString(massMailItem.Body.Replace("??address??", mailReciever1.Salutation), null, "text/html");
+            AddImages(massMailItem.Images, htmlView);
+            msg.AlternateViews.Add(htmlView);
+
+            // Send the mail
+            smtpClient.Send(msg);
+        }
+    }
+
+    private static void AddImages(IList<ImageMetaData> images, AlternateView htmlView)
+    {
+        foreach (var image in images)
+        {
+            var imagelink = new LinkedResource(image.Url)
+            {
+                ContentId = image.ContentId,
+                //ContentLink = new Uri("cid:" + image.ContentId),
+                //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
+            };
+
+            htmlView.LinkedResources.Add(imagelink);
+        }
+    }
+
+    private void SendWithNoSalutation(MassMailItem massMailItem, SmtpClient smtpClient)
+    {
+        // build the message to send
+        var msg = new MailMessage
+        {
+            From = new MailAddress(massMailItem.From)
+        };
+
+        foreach (var mailReciever in massMailItem.To.Where(x => string.IsNullOrEmpty(x.Salutation)))
+        {
+            msg.Bcc.Add(mailReciever.EmailAddress);
+        }
+
+        msg.Subject = massMailItem.Subject;
+        msg.IsBodyHtml = true;
+        msg.BodyEncoding = Encoding.UTF8;
+
+        //string txtBody = "See this email online here: " + messageURL; 
+        //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
+
+        var htmlView = AlternateView.CreateAlternateViewFromString(massMailItem.Body.Replace("??address??", massMailItem.DefaultSalutation), null, "text/html");
+        AddImages(massMailItem.Images, htmlView);
+        msg.AlternateViews.Add(htmlView);
+
+        // Send the mail
+        smtpClient.Send(msg);
     }
 
     /// <summary>

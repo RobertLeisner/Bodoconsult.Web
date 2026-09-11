@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen. All rights reserved.
 
+using System.IO;
 using Bodoconsult.Web.Mail.Helpers;
 using Bodoconsult.Web.Mail.Models;
 using Bodoconsult.Web.Mail.Test.Helpers;
@@ -7,6 +8,7 @@ using NUnit.Framework;
 
 namespace Bodoconsult.Web.Mail.Test.Mailers;
 
+[TestFixture]
 internal class MailTestHelperTests
 {
     [Test]
@@ -20,8 +22,11 @@ internal class MailTestHelperTests
     }
 
     [Test]
-    public void SaveO365Credentials()
+    public void SaveO365Credentials_ValidCredentials_SavedAsJson()
     {
+        // Arrange
+        const string fileName = @"C:\temp\O365Mailer1.json";
+
         var acc = new O365MailAccount
         {
             ClientId = PasswordHandler.Encrypt(""),
@@ -32,6 +37,10 @@ internal class MailTestHelperTests
             UserName = PasswordHandler.Encrypt("")
         };
 
-        JsonHelper.SaveAsFile(@"C:\temp\O365Mailer1.json", acc);
+        // Act
+        JsonHelper.SaveAsFile(fileName, acc);
+
+        // Assert
+        Assert.That(File.Exists(fileName));
     }
 }

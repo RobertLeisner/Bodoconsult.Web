@@ -1,6 +1,6 @@
 # What does the library
 
-Bodoconsult.Core.Web.Mail library is intended for apps which have to send (but not receive) SMTP mails like console apps.
+Bodoconsult.Web.Mail library is intended for apps which have to send (but not receive) SMTP mails like console apps.
 
 Mass mail handling features are in an experimental state or work is in progress.
 
@@ -8,52 +8,74 @@ Mass mail handling features are in an experimental state or work is in progress.
 
 The source code contain a NUnit test classes, the following source code is extracted from. The samples below show the most helpful use cases for the library.
 
-## Send a simple mail with plain text
+## Send a simple mail with plain text via SMTP
 
-            var account = new MailAccount
-            {
-                SmtpServer = "smtp.test.de",
-                SmtpPassword = "test123!",
-                SmtpAccountName = "test@test.de",
-                MailAddressSender = "noreply@test.de",
-                UseSecureConnection = true
-            };
+``` csharp
+    var account = new SmtpMailAccount
+    {
+        SmtpServer = "smtp.test.de",
+        SmtpPassword = "test123!",
+        SmtpAccountName = "test@test.de",
+        MailAddressSender = "noreply@test.de",
+        UseSecureConnection = true
+    };
 			
-            var smtp = new SmtpMailer(account);
-            smtp.Init();
+    var smtp = new SmtpMailer(account);
+    smtp.Init();
+    smtp.Logon();
 
-            smtp.SendMail("to@test.de", "Testmail", "dgdgdgdgdgs sfsgdgs sshshsh");
+    smtp.SendMail("to@test.de", "Testmail", "dgdgdgdgdgs sfsgdgs sshshsh");
+```
 
-            Assert.That(true);
+## Send a HTML mail via SMTP
 
-## Send a HTML mail
+``` csharp
+    var account = new SmtpMailAccount
+    {
+        SmtpServer = "smtp.test.de",
+        SmtpPassword = "test123!",
+        SmtpAccountName = "test@test.de",
+        MailAddressSender = "noreply@test.de",
+        UseSecureConnection = true
+    };
 
-            var account = new MailAccount
-            {
-                SmtpServer = "smtp.test.de",
-                SmtpPassword = "test123!",
-                SmtpAccountName = "test@test.de",
-                MailAddressSender = "noreply@test.de",
-                UseSecureConnection = true
-            };
+    var msg = new MailMessage {IsBodyHtml = true};
 
-            var msg = new MailMessage {IsBodyHtml = true};
+    var add = new MailAddress(account.MailAddressSender);
+    msg.From = add;
 
+    add = new MailAddress(TestHelper.GetTestReceiver());
+    msg.To.Add(add);
 
-            var add = new MailAddress(account.MailAddressSender);
-            msg.From = add;
+    msg.Subject = "Bodoconsult.Core.Web.Mail: test mail";
+    msg.Body = "<p>ajHA SADad asd AS Ddad</p>";
 
-            add = new MailAddress(TestHelper.GetTestReceiver());
-            msg.To.Add(add);
+    var smtp = new SmtpMailer(account);
+    smtp.Init();
+    smtp.Logon();
 
-            msg.Subject = "Bodoconsult.Core.Web.Mail: test mail";
-            msg.Body = "<p>ajHA SADad asd AS Ddad</p>";
+    smtp.SendMail(msg);
+```
 
-            var smtp = new SmtpMailer(account);
-            smtp.Init();
+## Send a HTML mail via Office 365 (Graph)
 
-            smtp.SendMail(msg);
+``` csharp
+    var account = new O365MailAccount
+    {
+        ClientId = PasswordHandler.Encrypt(""),
+        ClientSecret = PasswordHandler.Encrypt(""),
+        Scope = PasswordHandler.Encrypt("https://graph.microsoft.com/.default"),
+        Instance = PasswordHandler.Encrypt("https://login.microsoftonline.com/{0}"),
+        Tenant = PasswordHandler.Encrypt(""),
+        UserName = PasswordHandler.Encrypt("")
+    };
 
+    var mailer = new =O365Mailer(account);
+    mailer.Init();
+    mailer.Logon();
+
+    mailer.SendMail("to@test.de", "Testmail", "dgdgdgdgdgs sfsgdgs sshshsh");
+```
 
 # About us
 

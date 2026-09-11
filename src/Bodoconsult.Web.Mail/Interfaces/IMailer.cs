@@ -45,7 +45,13 @@ public interface IMailer : IDisposable
     /// <param name="mailItem">Mail item to send</param>
     /// <returns>True on success else false</returns>
     bool SendMail(MailItem mailItem);
-    
+
+    /// <summary>
+    /// Send mail to all mail addresses registered in <see cref="MassMailItem"/>
+    /// </summary>
+    /// <param name="massMailItem">Mass mail item</param>
+    void SendMails(MassMailItem massMailItem);
+
     /// <summary>
     /// Load mail account data from a JSON string
     /// </summary>

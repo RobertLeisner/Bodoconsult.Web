@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 
-namespace Bodoconsult.Web.Mail;
+namespace Bodoconsult.Web.Mail.Models;
 
 /// <summary>
 /// meta data for an image file in a HTML document

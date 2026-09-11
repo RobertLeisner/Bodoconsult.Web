@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using Bodoconsult.Web.Mail.Converters;
 using Bodoconsult.Web.Mail.Mailers;
 using Bodoconsult.Web.Mail.Test.App;
 using Bodoconsult.Web.Mail.Test.Helpers;

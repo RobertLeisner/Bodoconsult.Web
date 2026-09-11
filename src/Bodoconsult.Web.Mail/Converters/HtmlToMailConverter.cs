@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.Web.Mail.Models;
 using Microsoft.Graph.Models;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using LinkedResource = System.Net.Mail.LinkedResource;
 
-namespace Bodoconsult.Web.Mail;
+namespace Bodoconsult.Web.Mail.Converters;
 
 /// <summary>
-/// Converts an HTML page to a body of a mail
+/// Converts an HTML page to a body of an email
 /// </summary>
 [SuppressMessage("ReSharper", "NotResolvedInText")]
 public sealed class HtmlToMailConverter

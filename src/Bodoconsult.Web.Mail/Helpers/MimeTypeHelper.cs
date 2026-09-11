@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Bodoconsult.Web.Mail;
+namespace Bodoconsult.Web.Mail.Helpers;
 
 /// <summary>
 /// Helper class for MIME types

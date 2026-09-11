@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-
 using System;
 using Bodoconsult.App.Abstractions.Interfaces;
 using Bodoconsult.Web.Mail.Interfaces;
@@ -9,7 +8,7 @@ using Bodoconsult.Web.Mail.Models;
 namespace Bodoconsult.Web.Mail.Mailers;
 
 /// <summary>
-/// Base class for simple and mass mailers <see cref="MassSmtpMailer" /> and <see cref="SmtpMailer"/>/>
+/// Base class for mailer instances
 /// </summary>
 public abstract class BaseMailer: IMailer
 {
@@ -73,6 +72,15 @@ public abstract class BaseMailer: IMailer
     /// <param name="mailItem">Mail item to send</param>
     /// <returns>True on errorelse false</returns>
     public virtual bool SendMail(MailItem mailItem)
+    {
+        throw new NotSupportedException("Override in derived classes");
+    }
+
+    /// <summary>
+    /// Send mail to all mail addresses registered in <see cref="MassMailItem"/>
+    /// </summary>
+    /// <param name="massMailItem">Mass mail item</param>
+    public virtual void SendMails(MassMailItem massMailItem)
     {
         throw new NotSupportedException("Override in derived classes");
     }

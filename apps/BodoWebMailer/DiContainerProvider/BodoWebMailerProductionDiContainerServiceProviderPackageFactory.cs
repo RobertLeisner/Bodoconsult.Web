@@ -2,12 +2,14 @@
 
 using Bodoconsult.App.Abstractions.Delegates;
 using Bodoconsult.App.Abstractions.Interfaces;
+using System.Runtime.Versioning;
 
 namespace BodoWebMailer.DiContainerProvider;
 
 /// <summary>
 /// The current DI container used for production 
 /// </summary>
+[SupportedOSPlatform("windows10.0.17763.0")]
 public class BodoWebMailerProductionDiContainerServiceProviderPackageFactory : IDiContainerServiceProviderPackageFactory
 {
     /// <summary>
