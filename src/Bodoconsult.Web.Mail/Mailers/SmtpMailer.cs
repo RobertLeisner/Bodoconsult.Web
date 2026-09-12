@@ -5,21 +5,20 @@ using Bodoconsult.App.Zip;
 using Bodoconsult.Web.Mail.Helpers;
 using Bodoconsult.Web.Mail.Interfaces;
 using Bodoconsult.Web.Mail.Models;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Mail;
-using System.Net.Mime;
-using System.Text;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace Bodoconsult.Web.Mail.Mailers;
 
 /// <summary>
 /// Send an email via SMTP unsecured or via SSL secured
 /// </summary>
-public sealed class SmtpMailer: BaseMailer
+public sealed class SmtpMailer : BaseMailer
 {
     private SmtpClient _smtpClient;
     private readonly string _htmlMailTemplate;
@@ -30,7 +29,7 @@ public sealed class SmtpMailer: BaseMailer
     /// Default SMTP mailer
     /// </summary>
     /// <param name="logger">Current logger</param>
-    public SmtpMailer(IAppLoggerProxy logger): base(logger)
+    public SmtpMailer(IAppLoggerProxy logger) : base(logger)
     {
         _htmlMailTemplate = MailHelper.GetTemplate("HtmlMail");
     }
@@ -40,27 +39,16 @@ public sealed class SmtpMailer: BaseMailer
     /// </summary>
     public override void Init()
     {
-        ServicePointManager.ServerCertificateValidationCallback =
-            (sender, certificate, chain, sslPolicyErrors) => true;
+        //ServicePointManager.ServerCertificateValidationCallback =
+        //    (sender, certificate, chain, sslPolicyErrors) => true;
 
-        if (string.IsNullOrEmpty(_currentMailAccount.SmtpAccountName))
-        {
-            _smtpClient = new SmtpClient(_currentMailAccount.SmtpServer)
-            {
-                Credentials = CredentialCache.DefaultNetworkCredentials,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                EnableSsl = _currentMailAccount.UseSecureConnection,
-                    
-            };
-        }
-        else
-        {
-            _smtpClient = new SmtpClient(_currentMailAccount.SmtpServer)
-            {
-                Credentials = new NetworkCredential(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpPassword),
-                EnableSsl = _currentMailAccount.UseSecureConnection
-            };
-        }
+        _smtpClient = new SmtpClient();
+
+        _smtpClient.Connect(_currentMailAccount.SmtpServer, _currentMailAccount.SmtpPort);
+
+        // Note: only needed if the SMTP server requires authentication
+        _smtpClient.Authenticate(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpPassword);
+
     }
 
     /// <summary>
@@ -73,15 +61,15 @@ public sealed class SmtpMailer: BaseMailer
     {
         try
         {
-            var msg = new MailMessage
+            var msg = new MimeMessage();
+
+            msg.From.Add(new MailboxAddress(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpAccountName));
+            msg.Subject = subject;
+            msg.Body = new TextPart("html")
             {
-                From = new MailAddress(CurrentMailAccount.MailAddressSender),
-                Subject = subject,
-                BodyEncoding = Encoding.UTF8,
-                IsBodyHtml = true,
-                Body = body
+                Text = body,
             };
-            msg.To.Add(to);
+            msg.To.Add(new MailboxAddress(to, to));
 
             _smtpClient.Send(msg);
         }
@@ -100,7 +88,7 @@ public sealed class SmtpMailer: BaseMailer
     /// Send mail based on a <see cref="MailMessage"/> object
     /// </summary>
     /// <param name="message"></param>
-    public void SendMail(MailMessage message)
+    public void SendMail(MimeMessage message)
     {
         try
         {
@@ -123,17 +111,21 @@ public sealed class SmtpMailer: BaseMailer
 
         //try
         //{
-        var msg = new MailMessage
-        {
-            From = new MailAddress(CurrentMailAccount.MailAddressSender),
-            Subject = mailItem.Subject,
-            IsBodyHtml = true
-        };
-
-        msg.To.Add(mailItem.To.Replace(";", ","));
+        var msg = new MimeMessage();
+        msg.From.Add(new MailboxAddress(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpAccountName));
         msg.Subject = mailItem.Subject;
-        msg.IsBodyHtml = true;
 
+
+        var receivers = mailItem.To.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var receiver in receivers)
+        {
+            msg.To.Add(new MailboxAddress(receiver, receiver));
+        }
+
+        string body;
+
+        var builder = new BodyBuilder();
 
         if (!string.IsNullOrEmpty(mailItem.Logo))
         {
@@ -141,27 +133,22 @@ public sealed class SmtpMailer: BaseMailer
             // Plain HTML ink
             if (mailItem.Logo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                msg.Body = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, mailItem.Logo, _htmlMailTemplate);
+                body = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, mailItem.Logo, _htmlMailTemplate);
 
             }
             // Local file as logo
             else
             {
-                var inlineLogo = new LinkedResource(mailItem.Logo) { ContentId = Guid.NewGuid().ToString() };
+                var inlineLogo = builder.LinkedResources.Add(mailItem.Logo);
 
-                var body = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, $"cid:{inlineLogo.ContentId}", _htmlMailTemplate);
-                msg.BodyEncoding = Encoding.UTF8;
+                body = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, $"cid:{inlineLogo.ContentId}", _htmlMailTemplate);
 
-                var view = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
-                view.LinkedResources.Add(inlineLogo);
-                msg.AlternateViews.Add(view);
             }
         }
         else
         {
-            msg.Body = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, string.Empty, _htmlMailTemplate);
+            body = MailHelper.FormatBody(mailItem.Body, mailItem.Subject, mailItem.SignatureTemplate, string.Empty, _htmlMailTemplate);
         }
-
 
         if (!string.IsNullOrEmpty(mailItem.Attachments))
         {
@@ -171,26 +158,30 @@ public sealed class SmtpMailer: BaseMailer
             {
                 var zipFileStream = new MemoryStream();
 
-                // Password handling missing
+                // ToDo: Password handling missing
                 var zh = new ZipHandler(files);
                 zh.GenerateZip(zipFileStream);
 
-                var att = new Attachment(zipFileStream, new ContentType("application/zip"))
+                var attachment = new MimePart("image", "gif")
                 {
-                    Name = "data.zip"
+                    Content = new MimeContent(zipFileStream),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = "data.zip"
                 };
 
-                msg.Attachments.Add(att);
+                builder.Attachments.Add(attachment);
             }
             else
             {
                 foreach (var file in files.Where(file => !string.IsNullOrEmpty(file)))
                 {
-                    msg.Attachments.Add(new Attachment(file));
+                    builder.Attachments.Add(file);
                 }
             }
         }
 
+        builder.HtmlBody = body;
 
         try
         {
@@ -216,91 +207,80 @@ public sealed class SmtpMailer: BaseMailer
     /// <param name="massMailItem">Mass mail item</param>
     public override void SendMails(MassMailItem massMailItem)
     {
-        var smtpClient = new SmtpClient(_currentMailAccount.SmtpServer)
-        {
-            Credentials = new NetworkCredential(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpPassword),
-            EnableSsl = _currentMailAccount.UseSecureConnection
-        };
-
         // 1. Send emails to receivers with no salutation
         if (massMailItem.To.Any(x => string.IsNullOrEmpty(x.Salutation)))
         {
-            SendWithNoSalutation(massMailItem, smtpClient);
+            SendWithNoSalutation(massMailItem);
         }
 
         // 2. Send emails to receivers with salutation
-        SendWithSalutation(massMailItem, smtpClient);
-
-        smtpClient.Dispose();
+        SendWithSalutation(massMailItem);
     }
 
-    private void SendWithSalutation(MassMailItem massMailItem, SmtpClient smtpClient)
+    private void SendWithSalutation(MassMailItem massMailItem)
     {
         foreach (var mailReciever1 in massMailItem.To.Where(x => !string.IsNullOrEmpty(x.Salutation)))
         {
-            var msg = new MailMessage
+            var msg = new MimeMessage
             {
-                From = new MailAddress(massMailItem.From),
                 Subject = massMailItem.Subject,
-                IsBodyHtml = true,
-                BodyEncoding = Encoding.UTF8
             };
 
-            msg.Bcc.Add(mailReciever1.EmailAddress);
+            msg.From.Add(new MailboxAddress(massMailItem.From, massMailItem.From));
 
-            //string txtBody = "See this email online here: " + messageURL; 
-            //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
+            msg.Bcc.Add(new MailboxAddress(mailReciever1.EmailAddress, mailReciever1.EmailAddress) );
 
-            var htmlView = AlternateView.CreateAlternateViewFromString(massMailItem.Body.Replace("??address??", mailReciever1.Salutation), null, "text/html");
-            AddImages(massMailItem.Images, htmlView);
-            msg.AlternateViews.Add(htmlView);
+            var builder = new BodyBuilder
+            {
+                HtmlBody = massMailItem.Body.Replace("??address??", mailReciever1.Salutation, StringComparison.OrdinalIgnoreCase)
+            };
+
+            // Add inline images
+            AddImages(massMailItem.Images, builder);
+
+            // ToDo: attachments
+
+
+            msg.Body = builder.ToMessageBody();
 
             // Send the mail
-            smtpClient.Send(msg);
+            SendMail(msg);
         }
     }
 
-    private static void AddImages(IList<ImageMetaData> images, AlternateView htmlView)
+    private static void AddImages(IList<ImageMetaData> images, BodyBuilder builder)
     {
         foreach (var image in images)
         {
-            var imagelink = new LinkedResource(image.Url)
-            {
-                ContentId = image.ContentId,
-                //ContentLink = new Uri("cid:" + image.ContentId),
-                //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
-            };
-
-            htmlView.LinkedResources.Add(imagelink);
+            var imagelink = builder.LinkedResources.Add(image.Url);
+            imagelink.ContentId = image.ContentId;
         }
     }
 
-    private void SendWithNoSalutation(MassMailItem massMailItem, SmtpClient smtpClient)
+    private void SendWithNoSalutation(MassMailItem massMailItem)
     {
         // build the message to send
-        var msg = new MailMessage
-        {
-            From = new MailAddress(massMailItem.From)
-        };
-
+        var msg = new MimeMessage();
+        msg.From.Add(new MailboxAddress(massMailItem.From, massMailItem.From));  
         foreach (var mailReciever in massMailItem.To.Where(x => string.IsNullOrEmpty(x.Salutation)))
         {
-            msg.Bcc.Add(mailReciever.EmailAddress);
+            msg.Bcc.Add(new MailboxAddress(mailReciever.EmailAddress, mailReciever.EmailAddress));
         }
 
         msg.Subject = massMailItem.Subject;
-        msg.IsBodyHtml = true;
-        msg.BodyEncoding = Encoding.UTF8;
 
-        //string txtBody = "See this email online here: " + messageURL; 
-        //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
+        var builder = new BodyBuilder
+        {
+            HtmlBody = massMailItem.Body.Replace("??address??", massMailItem.DefaultSalutation, StringComparison.OrdinalIgnoreCase)
+        };
 
-        var htmlView = AlternateView.CreateAlternateViewFromString(massMailItem.Body.Replace("??address??", massMailItem.DefaultSalutation), null, "text/html");
-        AddImages(massMailItem.Images, htmlView);
-        msg.AlternateViews.Add(htmlView);
+        // Add inline images
+        AddImages(massMailItem.Images, builder);
+
+        // ToDo: attachments
 
         // Send the mail
-        smtpClient.Send(msg);
+        SendMail(msg);
     }
 
     /// <summary>

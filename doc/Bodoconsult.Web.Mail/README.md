@@ -62,15 +62,15 @@ The source code contain a NUnit test classes, the following source code is extra
 ``` csharp
     var account = new O365MailAccount
     {
-        ClientId = PasswordHandler.Encrypt(""),
-        ClientSecret = PasswordHandler.Encrypt(""),
-        Scope = PasswordHandler.Encrypt("https://graph.microsoft.com/.default"),
-        Instance = PasswordHandler.Encrypt("https://login.microsoftonline.com/{0}"),
-        Tenant = PasswordHandler.Encrypt(""),
-        UserName = PasswordHandler.Encrypt("")
+        ClientId = ""),
+        ClientSecret = "",
+        Scope = "https://graph.microsoft.com/.default",
+        Instance = "https://login.microsoftonline.com/{0}",
+        Tenant = "",
+        UserName = ""
     };
 
-    var mailer = new =O365Mailer(account);
+    var mailer = new O365Mailer(account);
     mailer.Init();
     mailer.Logon();
 

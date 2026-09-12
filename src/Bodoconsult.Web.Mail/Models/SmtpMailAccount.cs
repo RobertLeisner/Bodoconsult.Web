@@ -39,4 +39,9 @@ public sealed class SmtpMailAccount: IMailAccount
     /// Use secured connection via SSL
     /// </summary>
     public bool UseSecureConnection { get; set; }
+
+    /// <summary>
+    /// Port to use. Default: 587
+    /// </summary>
+    public int SmtpPort { get; set; } = 587;
 }

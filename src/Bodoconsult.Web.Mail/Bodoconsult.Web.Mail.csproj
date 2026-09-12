@@ -37,6 +37,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Bodoconsult.App" Version="1.0.9" />
+		<PackageReference Include="MailKit" Version="4.17.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.19" />
 		<PackageReference Include="Microsoft.Graph" Version="6.6.0" />
 		<PackageReference Include="Microsoft.Identity.Web.GraphServiceClient" Version="4.14.2" />

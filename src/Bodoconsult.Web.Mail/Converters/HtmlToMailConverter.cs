@@ -8,11 +8,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Mail;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using LinkedResource = System.Net.Mail.LinkedResource;
+using MimeKit;
 
 namespace Bodoconsult.Web.Mail.Converters;
 
@@ -252,29 +250,20 @@ public sealed class HtmlToMailConverter
     /// Store all data from the converter to the mail message
     /// </summary>
     /// <param name="msg">Mail message object</param>
-    public void SaveToMail(ref MailMessage msg)
+    public void SaveToMail(ref MimeMessage msg)
     {
-        msg.IsBodyHtml = true;
-        msg.Body = Content;
-        msg.BodyEncoding = Encoding.UTF8;
+        var builder = new BodyBuilder
+        {
+            HtmlBody = Content
+        };
 
-        //string txtBody = "See this email online here: " + messageURL; 
-        //AlternateView plainView = AlternateView.CreateAlternateViewFromString(txtBody, null, "text/plain"); 
-
-        var htmlView = AlternateView.CreateAlternateViewFromString(Content, null, "text/html");
         foreach (var image in Images)
         {
-            var imagelink = new LinkedResource(image.Url)
-            {
-                ContentId = image.ContentId,
-                //ContentLink = new Uri("cid:" + image.ContentId),
-                //TransferEncoding = System.Net.Mime.TransferEncoding.Base64
-            };
-
-            htmlView.LinkedResources.Add(imagelink);
+            var imagelink = builder.LinkedResources.Add(image.Url);
+            imagelink.ContentId = image.ContentId;
         }
 
-        msg.AlternateViews.Add(htmlView);
+        msg.Body = builder.ToMessageBody();
     }
 
     /// <summary>

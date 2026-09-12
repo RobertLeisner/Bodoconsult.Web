@@ -12,7 +12,6 @@ using Bodoconsult.Web.Html.Html;
 using Bodoconsult.Web.Html.HtmlTables;
 using Bodoconsult.Web.Mail.Helpers;
 using Bodoconsult.Web.Mail.Models;
-using BodoWebMailer.Business.Helpers;
 using BodoWebMailer.Business.Interfaces;
 
 namespace BodoWebMailer.Business.Services;

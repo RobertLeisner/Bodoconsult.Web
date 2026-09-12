@@ -91,11 +91,8 @@ public static class TestHelper
     /// <returns></returns>
     public static SmtpMailAccount GetTestMailAccount()
     {
-
         var fileName = Path.Combine(_secretsPath, "BodoWebMailer.json");
-
         var account = JsonHelper.LoadJsonFile<SmtpMailAccount>(fileName);
-
         return account;
     }
 

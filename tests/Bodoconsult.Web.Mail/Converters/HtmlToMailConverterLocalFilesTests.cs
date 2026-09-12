@@ -4,12 +4,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using Bodoconsult.Web.Mail.Converters;
 using Bodoconsult.Web.Mail.Mailers;
 using Bodoconsult.Web.Mail.Test.App;
 using Bodoconsult.Web.Mail.Test.Helpers;
 using Microsoft.Graph.Models;
+using MimeKit;
 using NUnit.Framework;
 
 namespace Bodoconsult.Web.Mail.Test.Converters;
@@ -32,7 +32,7 @@ public class HtmlToMailConverterLocalFilesTests
         c.DocUrl = _docUrl;
 
         // Assert
-        Assert.That(c.BaseUrl==_baseUrl);
+        Assert.That(c.BaseUrl == _baseUrl);
         Assert.That(c.LocalFile);
     }
 
@@ -69,7 +69,7 @@ public class HtmlToMailConverterLocalFilesTests
         // Assert
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
-        Assert.That(c.Images.Count>0);
+        Assert.That(c.Images.Count > 0);
         Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
     }
 
@@ -86,7 +86,7 @@ public class HtmlToMailConverterLocalFilesTests
 
         // Act
         c.ProcessContent();
-            
+
 
         // Assert
         Assert.That(!string.IsNullOrEmpty(c.Content));
@@ -102,8 +102,10 @@ public class HtmlToMailConverterLocalFilesTests
     public void SaveToMail_ValidMessage_SentViaSmtp()
     {
         // Arrange
-        var msg = new MailMessage {From = new MailAddress("noreply@bodoconsult.de")};
-        msg.To.Add( "robert.leisner@bodoconsult.de");
+        var msg = new MimeMessage();
+
+        msg.From.Add(new MailboxAddress("robert.leisner@mail.bodoconsult.de", "robert.leisner@mail.bodoconsult.de"));
+        msg.To.Add(new MailboxAddress("test@bodoconsult.de", "test@bodoconsult.de")); ;
         msg.Subject = $"Testmail {DateTime.Now:s}";
 
         var c = new HtmlToMailConverter { DocUrl = _docUrl };
@@ -131,19 +133,17 @@ public class HtmlToMailConverterLocalFilesTests
         ArgumentNullException.ThrowIfNull(c.Content);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
-        Assert.That(msg.AlternateViews.Count>0);
-        Assert.That(msg.AlternateViews[0].LinkedResources.Count>0);
     }
 
     [Test]
     public void SaveToMail_ValidMessage_SentViaO365()
     {
         // Arrange
-        const string to = "robert.leisner@bodoconsult.de";
+        const string to = "test@bodoconsult.de";
 
-        var msg = new Message( );
+        var msg = new Message();
 
-        var receips = to.Split([';']  ).Select(receiver => new Recipient { EmailAddress = new EmailAddress { Address = receiver } }).ToList();
+        var receips = to.Split([';']).Select(receiver => new Recipient { EmailAddress = new EmailAddress { Address = receiver } }).ToList();
 
         msg.ToRecipients = receips;
         msg.Subject = $"Testmail {DateTime.Now:s}";

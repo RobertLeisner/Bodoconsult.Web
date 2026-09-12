@@ -8,7 +8,6 @@ using Bodoconsult.Web.Mail.Test.Helpers;
 using NUnit.Framework;
 using System;
 using System.IO;
-using System.Net.Mail;
 
 namespace Bodoconsult.Web.Mail.Test.Mailers;
 
@@ -38,19 +37,14 @@ public class SmtpMailerTests
         var account = TestHelper.GetTestMailAccount();
 
         // New message as HTML mail
-        var msg = new MailMessage {IsBodyHtml = true};
-
-        // From
-        var add = new MailAddress(account.MailAddressSender);
-        msg.From = add;
-
-        // To
-        add = new MailAddress(TestHelper.GetTestReceiver());
-        msg.To.Add(add);
-
-        // Subject and mail body
-        msg.Subject = "Bodoconsult.Core.Web.Mail: test mail";
-        msg.Body = "<p>ajHA SADad asd AS Ddad</p>";
+        var msg = new MailItem
+        {
+            From = account.MailAddressSender,
+            To = TestHelper.GetTestReceiver(),
+            // Subject and mail body
+            Subject = "Bodoconsult.Web.Mail: test mail",
+            Body = "<p>ajHA SADad asd AS Ddad</p>"
+        };
 
         // Send the mail
         var smtp = new SmtpMailer(Globals.Instance.Logger);
