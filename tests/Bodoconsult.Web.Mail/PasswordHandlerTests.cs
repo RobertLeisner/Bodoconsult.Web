@@ -56,7 +56,7 @@ internal class PasswordHandlerTests
     public void Encrypt_ValidString_EncryptedSuccessfully()
     {
         // Arrange 
-        var s = "TestBahnhof123";
+        var s = "noreply@bodoconsult.de";
 
         // Act  
         var result1 = PasswordHandler.Encrypt(s);

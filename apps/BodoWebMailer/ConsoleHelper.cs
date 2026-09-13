@@ -29,15 +29,13 @@ public class ConsoleHelper
     /// </summary>
     public static int HashBytes { get; set; }
 
-
-       
     /// <summary>
-    /// Ask user for a password, encrypt it and copy it to the clipboard
+    /// Ask user for a token, encrypt it and copy it to the clipboard
     /// </summary>
-    public static bool EncryptPassword()
+    public static bool EncryptToken()
     {
      
-        Console.WriteLine("Insert password for user (encrypted password will be copied to clipboard):");
+        Console.WriteLine("Insert token for user (encrypted token will be copied to clipboard):");
         var s = PasswordHandler.ReadPassword();
 
         s = PasswordHandler.Encrypt(s);
@@ -46,7 +44,6 @@ public class ConsoleHelper
 
         return true;
     }
-
 
     /// <summary>
     /// Ask user for a password, hashs it and copy it to the clipboard
@@ -69,7 +66,6 @@ public class ConsoleHelper
             Console.WriteLine(e);
             return null;
         }
-    
     }
 
 

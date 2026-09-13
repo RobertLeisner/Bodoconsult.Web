@@ -17,6 +17,11 @@ public interface IMassMailHandler
     List<MailReceiver> MailReceivers { get; }
 
     /// <summary>
+    /// List with file paths to be attached to the mail
+    /// </summary>
+    List<string> Attachments { get; }
+
+    /// <summary>
     /// Subject for the mass mail
     /// </summary>
     string Subject { get; set; }

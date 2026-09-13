@@ -14,16 +14,14 @@ public static class TestHelper
 {
     private static string _testDataPath;
 
-    private static readonly string _secretsPath = "c:\\Daten\\Projekte\\_work\\Data\\";
+    private static readonly string SecretsPath = "c:\\Daten\\Projekte\\_work\\Data\\";
 
     public static string TempPath = @"c:\temp\";
-
-    private static PwdKeys pwdKeys;
 
 
     static TestHelper()
     {
-        var fileName = Path.Combine(_secretsPath, "mail.json");
+        var fileName = Path.Combine(SecretsPath, "mail.json");
 
         //pwdKeys = JsonHelper.LoadJsonFile<PwdKeys>(fileName);
 
@@ -38,7 +36,6 @@ public static class TestHelper
     {
         get
         {
-
             if (!string.IsNullOrEmpty(_testDataPath))
             {
                 return _testDataPath;
@@ -63,8 +60,12 @@ public static class TestHelper
     /// <param name="fileName"></param>
     public static void StartFile(string fileName)
     {
-
         if (!Debugger.IsAttached)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
@@ -81,9 +82,7 @@ public static class TestHelper
         };
 
         p.Start();
-
     }
-
 
     /// <summary>
     /// Get a test mail account. Adjust path to your current situation
@@ -91,13 +90,10 @@ public static class TestHelper
     /// <returns></returns>
     public static SmtpMailAccount GetTestMailAccount()
     {
-        var fileName = Path.Combine(_secretsPath, "BodoWebMailer.json");
+        var fileName = Path.Combine(SecretsPath, "BodoWebMailer.json");
         var account = JsonHelper.LoadJsonFile<SmtpMailAccount>(fileName);
         return account;
     }
-
-
-
 
     /// <summary>
     /// Get a test mail receiver. Adjust path to your current situation
@@ -105,16 +101,14 @@ public static class TestHelper
     /// <returns></returns>
     public static string GetTestReceiver()
     {
-        var fileName = Path.Combine(_secretsPath, "TestMailReceiver.txt");
-
+        var fileName = Path.Combine(SecretsPath, "TestMailReceiver.txt");
         var account = File.ReadAllText(fileName);
-
         return account;
     }
 
     public static O365MailAccount GetTestO365Account()
     {
-        var fileName = Path.Combine(_secretsPath, "O365Mailer1.json");
+        var fileName = Path.Combine(SecretsPath, "O365Mailer1.json");
 
         var account = JsonHelper.LoadJsonFile<O365MailAccount>(fileName);
 
@@ -131,6 +125,8 @@ public static class TestHelper
             Scope = PasswordHandler.Decrypt(account.Scope),
             UserName = PasswordHandler.Decrypt(account.UserName)
         };
+
+        //o365.UserName = "noreply@bodoconsult.de";
 
         return o365;
     }

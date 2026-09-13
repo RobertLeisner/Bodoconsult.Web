@@ -53,9 +53,9 @@
 		<Content Include="Templates\HtmlMail.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<None Include="..\..\doc\Bodoconsult.Web.Mail\README.md" Link="README.md" Pack="true" PackagePath="\">
+		<Content Include="..\..\doc\Bodoconsult.Web.Mail\README.md" Link="README.md" Pack="true" PackagePath="\">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		</Content>
 	</ItemGroup>
 
 </Project>

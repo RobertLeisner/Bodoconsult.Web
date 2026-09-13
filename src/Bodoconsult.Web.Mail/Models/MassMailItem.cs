@@ -38,4 +38,9 @@ public sealed class MassMailItem
     /// Images found in the body
     /// </summary>
     public List<ImageMetaData> Images { get; } = new();
+
+    /// <summary>
+    /// List with file paths to be attached to the mail
+    /// </summary>
+    public List<string> Attachments { get; } = new();
 }

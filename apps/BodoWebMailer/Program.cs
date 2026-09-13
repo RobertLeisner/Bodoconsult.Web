@@ -20,8 +20,8 @@ internal class Program
         {
             switch (args[0])
             {
-                case "/p": // Ask user for password, encrypt it and copy it to clipboard
-                    ConsoleHelper.EncryptPassword();
+                case "/p": // Ask user for token, encrypt it and copy it to clipboard
+                    ConsoleHelper.EncryptToken();
                     return 0;
                 default:
                     break;

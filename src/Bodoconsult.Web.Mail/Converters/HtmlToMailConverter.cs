@@ -289,7 +289,8 @@ public sealed class HtmlToMailConverter
                 ContentBytes = image.ContentBytes,
                 ContentType = image.MimeType,
                 ContentId = image.ContentId,
-                Name = image.Name
+                Name = image.Name,
+                IsInline = true
             };
 
             msg.Attachments.Add(att);

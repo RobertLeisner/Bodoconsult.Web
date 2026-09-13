@@ -1,3 +1,22 @@
+# Database installation for BodoWebMailer
+
+BodoWebMailer is a basic app sending formatted emails stored in a database table to the requested receivers.
+
+Currently BodoWebMailer is using a configurable Office365 mailbox to send mails (via Graph).
+
+BodoWebMailer is not a service. It is a simple console app and therefore easy to start from TaskScheduler.
+
+# Prerequisites
+
+BodoWebMailer is currently using a SqlServer database installable on SqlServer Express 2019 and later as minimum requirement.
+
+Create a fresh database BodoWebMailer on the SqlServer (Express) you want to use.
+
+# Create the required database entities
+
+You can find the following SQL commands in the file SQLSever_Install.sql in the folder DB_Install. Run the SQL in your database BodoWebMailer i.e. from SSMS to create the required entities in the database:
+
+``` sql
 USE [BodoWebMailer]
 
 GO
@@ -95,7 +114,7 @@ create proc [dbo].[spMail_Delete]
 /*
 Delete mail after sending
 
-© 2026 Bodoconsult EDV-Dienstleistungen GmbH
+Â© 2026 Bodoconsult EDV-Dienstleistungen GmbH
 */
 as
 
@@ -115,7 +134,7 @@ CREATE proc [dbo].[spMail_FetchAll]
 /*
 Alle Mails holen
 
-© 2026 Bodoconsult EDV-Dienstleistungen GmbH
+Â© 2026 Bodoconsult EDV-Dienstleistungen GmbH
 */
 as
 
@@ -164,7 +183,7 @@ CREATE proc [dbo].[spMail_MoveToArchive]
 /*
 Move mails to archive
 
-© 2026 Bodoconsult EDV-Dienstleistungen GmbH
+Â© 2026 Bodoconsult EDV-Dienstleistungen GmbH
 */
 as
 
@@ -228,7 +247,7 @@ create proc [dbo].[spMail_SetError]
 /*
 Set error flag for a mail if sending this mail has failed
 
-© 2026 Bodoconsult EDV-Dienstleistungen GmbH
+Â© 2026 Bodoconsult EDV-Dienstleistungen GmbH
 */
 as
 
@@ -249,7 +268,7 @@ create proc [dbo].[spMail_Test]
 /*
 Create a test mail
 
-© 2026 Bodoconsult EDV-Dienstleistungen GmbH
+Â© 2026 Bodoconsult EDV-Dienstleistungen GmbH
 */
 as
 
@@ -323,3 +342,75 @@ GO
 GRANT SELECT ON dbo.Settings TO MailSender
 
 GO
+```
+
+# Stored credentials to database
+
+Now open a text editor and create the following JSON text in it for Office 365 usage:
+
+``` csharp
+{
+	"$type": "Bodoconsult.Web.Mail.Models.O365MailAccount, Bodoconsult.Web.Mail",
+	"Instance": "??encryptedValue??",
+	"Tenant": "??encryptedValue??",
+	"ClientId": "??encryptedValue??",
+	"ClientSecret": "??encryptedValue??",
+	"UserName": "??encryptedValue??",
+	"Scope": "??encryptedValue??"
+}
+```
+
+Set Instance to 'https://login.microsoftonline.com/{0}', Scope to 'https://graph.microsoft.com/.default' normally.
+
+All value shvae to encrypted. Use command line command
+
+``` cmd
+BodoWebMailer /p 
+```
+
+to encrypt each required token.
+
+Copy the JSON to the following SQl statement (replace the existing JSON in the SQL below)s:
+
+``` sql
+GO
+
+INSERT INTO [dbo].[Settings]
+           ([S_ID]
+           ,[sKey]
+           ,[Value]
+           ,[Description])
+     VALUES
+           (newid()
+           ,'MailAccount'
+           ,'{
+	"$type": "Bodoconsult.Web.Mail.Model.O365MailAccount, Bodoconsult.Web.Mail",
+	"Instance": "Your instance encrypted",
+	"Tenant": "Your tenant encrypted",
+	"ClientId": "Your clientID encrypted",
+	"ClientSecret": "Your client secret encrypted",
+	"UserName": "Your username encrypted",
+	"Scope": "Your scope encrypted"
+}'
+           ,'JSON string with mail acccount object')
+
+GO           
+```
+
+Run the SQL statement
+
+# Using SMTP
+
+For using 
+
+``` csharp
+{
+	"$type": "Bodoconsult.Web.Mail.Models.SmtpMailAccount, Bodoconsult.Web.Mail",
+	"SmtpServer": "??encryptedValue??",
+	"SmtpAccountName": "??encryptedValue??",
+	"SmtpPassword": "??encryptedValue??",
+	"MailAddressSender": "??encryptedValue??",
+	"UseSecureConnection": true
+}
+```
+

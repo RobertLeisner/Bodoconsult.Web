@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using static System.Net.WebRequestMethods;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace Bodoconsult.Web.Mail.Mailers;
@@ -39,16 +40,11 @@ public sealed class SmtpMailer : BaseMailer
     /// </summary>
     public override void Init()
     {
-        //ServicePointManager.ServerCertificateValidationCallback =
-        //    (sender, certificate, chain, sslPolicyErrors) => true;
-
         _smtpClient = new SmtpClient();
-
         _smtpClient.Connect(_currentMailAccount.SmtpServer, _currentMailAccount.SmtpPort);
 
         // Note: only needed if the SMTP server requires authentication
         _smtpClient.Authenticate(_currentMailAccount.SmtpAccountName, _currentMailAccount.SmtpPassword);
-
     }
 
     /// <summary>
@@ -238,13 +234,21 @@ public sealed class SmtpMailer : BaseMailer
             // Add inline images
             AddImages(massMailItem.Images, builder);
 
-            // ToDo: attachments
-
+            // Add attachments
+            AddAttachments(massMailItem, builder);
 
             msg.Body = builder.ToMessageBody();
 
             // Send the mail
             SendMail(msg);
+        }
+    }
+
+    private static void AddAttachments(MassMailItem massMailItem, BodyBuilder builder)
+    {
+        foreach (var file in massMailItem.Attachments.Where(file => !string.IsNullOrEmpty(file)))
+        {
+            builder.Attachments.Add(file);
         }
     }
 
@@ -277,7 +281,8 @@ public sealed class SmtpMailer : BaseMailer
         // Add inline images
         AddImages(massMailItem.Images, builder);
 
-        // ToDo: attachments
+        // Add attachments
+        AddAttachments(massMailItem, builder);
 
         // Send the mail
         SendMail(msg);

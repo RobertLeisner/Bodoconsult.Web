@@ -30,6 +30,11 @@ public sealed class MassMailHandler : IMassMailHandler
     public List<MailReceiver> MailReceivers { get; } = new();
 
     /// <summary>
+    /// List with file paths to be attached to the mail
+    /// </summary>
+    public List<string> Attachments { get; } = new();
+
+    /// <summary>
     /// Subject for the mass mail
     /// </summary>
     public string Subject { get; set; }
@@ -76,8 +81,10 @@ public sealed class MassMailHandler : IMassMailHandler
             From = _mailer.CurrentMailAccount.MailAddressSender,
             Subject = Subject,
             Body = MasterMailText.Content,
-            DefaultSalutation = DefaultSalutation
+            DefaultSalutation = DefaultSalutation,
         };
+
+        mmi.Attachments.AddRange(Attachments);
 
         foreach (var receiver in MailReceivers)
         {
