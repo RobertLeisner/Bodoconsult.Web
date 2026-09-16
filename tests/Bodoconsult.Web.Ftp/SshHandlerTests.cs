@@ -2,6 +2,8 @@
 
 using System.IO;
 using System.Linq;
+using Bodoconsult.Web.Ftp.Models;
+using Bodoconsult.Web.Ftp.RemoteServerHandler;
 using Bodoconsult.Web.Ftp.Test.Helpers;
 using NUnit.Framework;
 
@@ -10,7 +12,6 @@ namespace Bodoconsult.Web.Ftp.Test;
 [TestFixture]
 internal class SshHandlerTests
 {
-
     private readonly SshCredentials _credentials = TestHelper.GetCredentials();
 
     [Test]
@@ -31,11 +32,9 @@ internal class SshHandlerTests
         Assert.That(erg);
     }
 
-
     [Test]
     public void TestPutMainDirectory()
     {
-
         // Arrange
         var localPath = TestHelper.FtpTestFilePath;
 
@@ -89,7 +88,6 @@ internal class SshHandlerTests
     [Test]
     public void TestRemoveFile()
     {
-
         // Arrange
         var localPath = TestHelper.FtpTestFilePath;
 
@@ -121,7 +119,6 @@ internal class SshHandlerTests
     [Test]
     public void TestRemoveFileFileNotExisting()
     {
-
         // Arrange
         var localPath = TestHelper.FtpTestFilePath;
 
@@ -149,7 +146,6 @@ internal class SshHandlerTests
     [Test]
     public void TestCreateDirectory()
     {
-
         // Arrange
         var remotePath = TestHelper.FtpSubDirCreate;
 
@@ -178,7 +174,6 @@ internal class SshHandlerTests
     [Test]
     public void TestListDirectoryRaw()
     {
-
         // Arrange
         const string remotePath = TestHelper.FtpSubDir;
 
@@ -213,7 +208,6 @@ internal class SshHandlerTests
     [Test]
     public void TestListDirectory()
     {
-
         // Arrange
         const string remotePath = TestHelper.FtpSubDir;
 
@@ -248,7 +242,6 @@ internal class SshHandlerTests
     [Test]
     public void TestDownloadFile()
     {
-
         // Arrange
         var remotePath = $"/{TestHelper.FtpTestFileName}";
         var localPath = Path.Combine(TestHelper.LocalTargetPath,"AAA.txt");
@@ -282,7 +275,6 @@ internal class SshHandlerTests
     [Test]
     public void TestRemoveDirectory()
     {
-
         // Arrange
         var remotePath1 = TestHelper.FtpSubDirCreate;
 
@@ -306,5 +298,4 @@ internal class SshHandlerTests
         Assert.That(erg1);
         Assert.That(!erg2);
     }
-
 }

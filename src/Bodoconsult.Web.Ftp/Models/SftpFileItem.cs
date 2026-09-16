@@ -1,6 +1,8 @@
-﻿using System;
+﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-namespace Bodoconsult.Web.Ftp;
+using System;
+
+namespace Bodoconsult.Web.Ftp.Models;
 
 /// <summary>
 /// Represents a file or directory on the STFP server

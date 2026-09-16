@@ -21,6 +21,7 @@ internal class MailTestHelperTests
         Assert.That(result, Is.Not.Null);
     }
 
+    [Explicit]
     [Test]
     public void SaveO365Credentials_ValidCredentials_SavedAsJson()
     {

@@ -3,9 +3,10 @@
 using System.Collections.Generic;
 using System.IO;
 using Bodoconsult.Web.Ftp.Interfaces;
+using Bodoconsult.Web.Ftp.Models;
 using Renci.SshNet;
 
-namespace Bodoconsult.Web.Ftp;
+namespace Bodoconsult.Web.Ftp.RemoteServerHandler;
 
 /// <summary>
 /// Handles SSH access to FTP server
@@ -37,7 +38,7 @@ public class SshHandler : IRemoteServerHandler
     /// <summary>
     /// Is SFTP server connected?
     /// </summary>
-    public bool IsConnected => _sftp != null && _sftp.IsConnected;
+    public bool IsConnected => _sftp is { IsConnected: true };
 
 
     /// <summary>

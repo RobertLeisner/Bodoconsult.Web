@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Bodoconsult.App.Abstractions.Interfaces;
 using Bodoconsult.App.Zip;
 using Bodoconsult.Web.Mail.Helpers;
@@ -13,6 +9,13 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users.Item.SendMail;
 using Microsoft.Kiota.Abstractions.Authentication;
+using MimeKit;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
 using Attachment = Microsoft.Graph.Models.Attachment;
 
 namespace Bodoconsult.Web.Mail.Mailers;
@@ -150,7 +153,7 @@ public class O365Mailer: BaseMailer
             var attachment = new FileAttachment
             {
                 ContentType = MimeTypeHelper.GetMimeTypeFromFilePath(mailItem.Logo),
-                ContentBytes = File.ReadAllBytes(mailItem.Logo),
+                ContentBytes = System.IO.File.ReadAllBytes(mailItem.Logo),
                 ContentId = "i0",
                 IsInline = true,
                 Name = "Logo"
@@ -209,14 +212,130 @@ public class O365Mailer: BaseMailer
                 {
                     ContentType = MimeTypeHelper.GetMimeTypeFromFilePath(file),
                     ContentId = $"i{i}",
-                    ContentBytes = File.ReadAllBytes(file),
-                    Name = "data.zip"
+                    ContentBytes = System.IO.File.ReadAllBytes(file),
+                    Name = Path.GetFileName(file)
                 };
 
                 message.Attachments.Add(attachment);
                 i++;
             }
         }
+    }
+
+    /// <summary>
+    /// Send mail to all mail addresses registered in <see cref="MassMailItem"/>
+    /// </summary>
+    /// <param name="massMailItem">Mass mail item</param>
+    public override void SendMails(MassMailItem massMailItem)
+    {
+        // 1. Send emails to receivers with no salutation
+        if (massMailItem.To.Any(x => string.IsNullOrEmpty(x.Salutation)))
+        {
+            SendWithNoSalutation(massMailItem);
+        }
+
+        // 2. Send emails to receivers with salutation
+        SendWithSalutation(massMailItem);
+    }
+
+    private void SendWithSalutation(MassMailItem massMailItem)
+    {
+        foreach (var mailReciever1 in massMailItem.To.Where(x => !string.IsNullOrEmpty(x.Salutation)))
+        {
+            var msg = new Message
+            {
+                Subject = massMailItem.Subject,
+                From = GetRecipient(massMailItem.From),
+                BccRecipients =
+                [
+                    GetRecipient(mailReciever1.EmailAddress)
+                ],
+                Body = new ItemBody
+                {
+                    ContentType = BodyType.Html,
+                    Content = massMailItem.Body.Replace("??address??", mailReciever1.Salutation, StringComparison.OrdinalIgnoreCase)
+                }
+            };
+
+
+            // Add inline images
+            AddImages(massMailItem.Images, msg);
+
+            // Add attachments
+            AddAttachments(massMailItem, msg);
+
+            // Send the mail
+            SendMail(msg);
+        }
+    }
+
+    private void AddAttachments(MassMailItem massMailItem, Message message)
+    {
+        message.Attachments ??= new();
+
+        var i = 0;
+        foreach (var file in massMailItem.Attachments.Where(file => !string.IsNullOrEmpty(file)))
+        {
+            var attachment = new FileAttachment
+            {
+                ContentType = MimeTypeHelper.GetMimeTypeFromFilePath(file),
+                ContentId = $"i{i}",
+                ContentBytes = System.IO.File.ReadAllBytes(file),
+                Name = Path.GetFileName(file)
+            };
+
+            message.Attachments.Add(attachment);
+            i++;
+        }
+    }
+
+    private static void AddImages(IList<ImageMetaData> images, Message message)
+    {
+        message.Attachments ??= new();
+
+        foreach (var image in images.Where(file => !string.IsNullOrEmpty(file.Url)))
+        {
+            var attachment = new FileAttachment
+            {
+                ContentType = MimeTypeHelper.GetMimeTypeFromFilePath(image.Url),
+                ContentId = image.ContentId,
+                ContentBytes = System.IO.File.ReadAllBytes(image.Url),
+                IsInline = true,
+                Name = Path.GetFileName(image.Url)
+            };
+
+            message.Attachments.Add(attachment);
+        }
+    }
+
+    private void SendWithNoSalutation(MassMailItem massMailItem)
+    {
+        // build the message to send
+        var msg = new Message
+        {
+            Subject = massMailItem.Subject,
+            From = GetRecipient(massMailItem.From),
+            BccRecipients = []
+        };
+        foreach (var mailReciever in massMailItem.To.Where(x => string.IsNullOrEmpty(x.Salutation)))
+        {
+            msg.BccRecipients.Add(GetRecipient(mailReciever.EmailAddress));
+        }
+
+        msg.Body = new ItemBody
+        {
+            ContentType = BodyType.Html,
+            Content = massMailItem.Body.Replace("??address??", massMailItem.DefaultSalutation, StringComparison.OrdinalIgnoreCase)
+        };
+
+        // Add inline images
+        AddImages(massMailItem.Images,msg);
+
+        // Add attachments
+        AddAttachments(massMailItem, msg);
+
+        // Send the mail
+        SendMail(msg);
     }
 
     /// <summary>

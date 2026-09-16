@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
-using static System.Net.WebRequestMethods;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace Bodoconsult.Web.Mail.Mailers;
@@ -237,6 +236,7 @@ public sealed class SmtpMailer : BaseMailer
             // Add attachments
             AddAttachments(massMailItem, builder);
 
+            // Add body
             msg.Body = builder.ToMessageBody();
 
             // Send the mail
@@ -283,6 +283,9 @@ public sealed class SmtpMailer : BaseMailer
 
         // Add attachments
         AddAttachments(massMailItem, builder);
+
+        // Add body
+        msg.Body = builder.ToMessageBody();
 
         // Send the mail
         SendMail(msg);

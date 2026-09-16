@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Bodoconsult.Web.Ftp.Models;
+using System.IO;
 using System.Reflection;
 
 namespace Bodoconsult.Web.Ftp.Test.Helpers;

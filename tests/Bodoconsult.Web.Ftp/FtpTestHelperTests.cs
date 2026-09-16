@@ -1,5 +1,6 @@
 // Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
+using Bodoconsult.Web.Ftp.Models;
 using Bodoconsult.Web.Ftp.Test.Helpers;
 using NUnit.Framework;
 

@@ -603,7 +603,7 @@ public static class MimeTypeHelper
     /// <returns>MIME type or null if file extension is not registered</returns>
     public static string GetMimeTypeFromFilePath(string path)
     {
-        var extension = new FileInfo(path).Extension;
+        var extension = Path.GetExtension(path);
 
         if (string.IsNullOrEmpty(extension))
         {

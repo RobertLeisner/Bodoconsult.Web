@@ -23,12 +23,6 @@ public sealed class HtmlToMailConverter
     private static readonly HttpClient HttpClient = new();
     private string _docUrl;
 
-    ///// <summary>
-    ///// standard CTOR
-    ///// </summary>
-    //public HtmlToMailConverter()
-    //{ }
-
     /// <summary>
     /// Document URL
     /// </summary>
@@ -73,12 +67,7 @@ public sealed class HtmlToMailConverter
     /// <summary>
     /// Contains all found images in the document
     /// </summary>
-    public IList<ImageMetaData> Images { get; set; } = new List<ImageMetaData>();
-
-    ///// <summary>
-    ///// Contains all images in the document as <see cref="LinkedResource"/>
-    ///// </summary>
-    //public IList<LinkedResource> LinkedResources { get; set; }
+    public List<ImageMetaData> Images { get; set; } = new();
 
     /// <summary>
     /// Load the file from its location

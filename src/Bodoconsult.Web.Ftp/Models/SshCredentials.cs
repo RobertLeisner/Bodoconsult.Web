@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen GmbH. All rights reserved.
 
-namespace Bodoconsult.Web.Ftp;
+namespace Bodoconsult.Web.Ftp.Models;
 
 /// <summary>
 /// Credentials for SFTP login

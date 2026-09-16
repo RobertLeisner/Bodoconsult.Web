@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Bodoconsult EDV-Dienstleistungen. All rights reserved.
 
+using Bodoconsult.Web.Ftp.Models;
 using System.Collections.Generic;
 
 namespace Bodoconsult.Web.Ftp.Interfaces;

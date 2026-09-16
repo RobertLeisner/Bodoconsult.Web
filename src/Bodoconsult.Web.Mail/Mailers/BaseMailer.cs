@@ -52,7 +52,7 @@ public abstract class BaseMailer: IMailer
     /// </summary>
     public virtual void Logon()
     {
-        throw new NotSupportedException("Override in derived classes");
+        // Do nothing
     }
 
     /// <summary>

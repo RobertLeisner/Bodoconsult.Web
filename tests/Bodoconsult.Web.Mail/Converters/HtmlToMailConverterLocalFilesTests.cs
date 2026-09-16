@@ -18,7 +18,7 @@ namespace Bodoconsult.Web.Mail.Test.Converters;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public class HtmlToMailConverterLocalFilesTests
 {
-    private readonly string _baseUrl = Path.Combine(TestHelper.TestDataPath, @"HtmlLocalData\");
+    private readonly string _baseUrl = Path.Combine(TestHelper.TestDataPath, "HtmlLocalData");
     private readonly string _docUrl = Path.Combine(TestHelper.TestDataPath, @"HtmlLocalData\Sample.txt");
 
     [Test]
@@ -32,7 +32,7 @@ public class HtmlToMailConverterLocalFilesTests
         c.DocUrl = _docUrl;
 
         // Assert
-        Assert.That(c.BaseUrl == _baseUrl);
+        Assert.That(c.BaseUrl, Is.EqualTo(_baseUrl));
         Assert.That(c.LocalFile);
     }
 
@@ -70,7 +70,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}\logo.jpg");
     }
 
     [Test]
@@ -92,7 +92,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}\logo.jpg");
         ArgumentNullException.ThrowIfNull(c.Content);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
@@ -129,7 +129,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}\logo.jpg");
         ArgumentNullException.ThrowIfNull(c.Content);
         Assert.That(!c.Content.Contains(".jpg"));
         Assert.That(c.Content.Contains("cid:"));
@@ -171,7 +171,7 @@ public class HtmlToMailConverterLocalFilesTests
         Assert.That(!string.IsNullOrEmpty(c.Content));
         Assert.That(c.LocalFile);
         Assert.That(c.Images.Count > 0);
-        Assert.That(c.Images[0].Url == $@"{_baseUrl}logo.jpg");
+        Assert.That(c.Images[0].Url == $@"{_baseUrl}\logo.jpg");
         //Assert.That(c.LinkedResources.Count > 0);
         //Assert.That(!c.Content.Contains(".jpg"));
         //Assert.That(c.Content.Contains("cid:"));

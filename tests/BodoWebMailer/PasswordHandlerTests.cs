@@ -12,15 +12,11 @@ namespace BodoWebMailer.Test;
 public class PasswordHandlerTests
 {
     [Test]
-    public void TestMethod_PlainPassword()
+    public void Decrypt_ValidPassword_PasswordDecrypted()
     {
-
-        //const string password = "XN9FXSH7EQSGV36R";
-
-        const string password = "Krumm2021Robert";
+        const string password = "Blubb";
 
         var encryptedPassword = PasswordHandler.Encrypt(password);
-
 
         Debug.Print(encryptedPassword);
 
@@ -30,30 +26,27 @@ public class PasswordHandlerTests
         Assert.That(password==decryptedPassword);
     }
 
-
     [Test]
-    public void TestMethod_DecryptPassword()
+    public void Decrypt2_ValidPassword_PasswordDecrypted()
     {
-        var encryptedPassword = "cccc";
-        var decryptedPassword = PasswordHandler.Decrypt(encryptedPassword);
+        const string password = "Blubb";
 
+        var encryptedPassword = PasswordHandler.Encrypt2(password);
 
-        Debug.Print(decryptedPassword);
-        Assert.That(!string.IsNullOrEmpty(decryptedPassword));
+        Debug.Print(encryptedPassword);
 
+        var decryptedPassword = PasswordHandler.Decrypt2(encryptedPassword);
+
+        Assert.That(!string.IsNullOrEmpty(encryptedPassword));
+        Assert.That(password == decryptedPassword);
     }
 
-
     [Test]
-    public void TestMethod_PlainPassword3()
+    public void Decrypt3_ValidPassword_PasswordDecrypted()
     {
-
-        //const string password = "XN9FXSH7EQSGV36R";
-
-        const string password = "Test";
+        const string password = "Blubb";
 
         var encryptedPassword = PasswordHandler.Encrypt3(password);
-
 
         Debug.Print(encryptedPassword);
 
@@ -63,14 +56,9 @@ public class PasswordHandlerTests
         Assert.That(password == decryptedPassword);
     }
 
-
-
     [Test]
-    public void TestMethod_HashPassword()
+    public void CreateHash_ValidPassword_HashCreated()
     {
-
-        //const string password = "XN9FXSH7EQSGV36R";
-
         const string password = "Test";
 
         const int saltBytes = 128;
@@ -79,30 +67,19 @@ public class PasswordHandlerTests
 
         var salt = PasswordHandler.CreateSalt(saltBytes);
 
-
-
         var hashedPassword = PasswordHandler.CreateHash(password, salt, hashBytes, iterations);
-
 
         Debug.Print(hashedPassword);
 
         Assert.That(hashedPassword.Length>0);
 
         var erg = PasswordHandler.ValidateHash(password, salt, hashedPassword, iterations);
-
-        //var decryptedPassword = PasswordHandler.Decrypt(encryptedPassword);
-
-        //Assert.That(!string.IsNullOrEmpty(encryptedPassword));
         Assert.That(erg);
     }
 
-
     [Test]
-    public void TestMethod_HashPasswordLong()
+    public void CreateHash_ValidPasswordLong_HashCreated()
     {
-
-        //const string password = "XN9FXSH7EQSGV36R";
-
         const string password = "Test";
 
         const int saltBytes = 512;
@@ -118,20 +95,13 @@ public class PasswordHandlerTests
         Assert.That(hashedPassword.Length > 0);
 
         var erg = PasswordHandler.ValidateHash(password, salt, hashedPassword, iterations);
-
-        //var decryptedPassword = PasswordHandler.Decrypt(encryptedPassword);
-
-        //Assert.That(!string.IsNullOrEmpty(encryptedPassword));
         Assert.That(erg);
     }
 
 
     [Test]
-    public void TestMethod_ValdidateReal()
+    public void CreateHash_ValidPassword_ValdidateRealSuccessful()
     {
-
-        //const string password = "XN9FXSH7EQSGV36R";
-
         const string password = "Test123";
         const int iterations = 10000;
 
@@ -139,21 +109,15 @@ public class PasswordHandlerTests
 
         var hashedPassword1 = PasswordHandler.CreateHash(password, salt, 512, iterations);
 
-
         Debug.Print(hashedPassword1);
 
-        var hashedPassword = "ngbDrmOkSmNlnvfKme9Hl/D9gZm87+1xKeEt7eMuA/cziB+bCNstal2/z8k/0YVld/dUooxa3XD88wNDhmOl6HB0Mxf2YoatfnJGPvxdzts45sOvuOwu1sUw1+J6pBciYYtvUP107sN/rwE+a0TPbw3Crpll/d3iAVlf1yHEcBvBGY7GNZFp4aDfADg4HMvpDpzBgLSh711aiU50nHXDu6U9ksUwfT/4DjCiUGBxgfeR2xRmQMp/d+Ee9/SU+qbkofnsAVvIt3O5ngZsfdOh9+1I+E/V00RNfmjZwqdhT/3WCdJw1pedLhmn72VYyBoMyxvwt1kXKzx08yDzNFrRJJ69rxOoPQxk66Cqb9qFxmRW5n6W2+h48cCO1pKccN1G3k+42LYkYYH4KqX5RDcJrRre520Lb/p/QxK+GXQzmFBeFPud79TDtGirOF8YDeabS5PbkAk7EUAs1pP5rIu4X5UFJ6T3eHzzxR8C0S1Oi15FnMcFasGcKJQ3EgdXnm32+00u6mOvEuT5JbY2SrE8oT3PDnuFTreLXq4dY7NL+vFLMQBGgIiCMAglQOCfxzvf23pHtwu6SaiR4fXLLjRiqA/i64l6U9RVqfeTLYmAIdTd9rEGx4vmmhyVKWSWO3aIdbMVJcjOyVsIL1UnrN3SwDuUsYkgTqWLzL0ZXT8Kseo=";
+        var hashedPassword = "n7MLCKXs2AXITuX+QKvmawoD6fKVK4M5dF7JX0H+vGHhDBd4tzAutIfLeHi3EKTZRMyi+1MhXuUL9XcprmoLqlI08kRseumKyvaE5g5fAki3QDQpwslP8QuxesBkbciGC8vNh3DcBhW/Jdxxytm5Qj0tT8QLE/eEhC/djetNw1A97bj/06GTEksy8mKfDIwv+AJF/21QtbWiYkpANQLQ5jQfXnRGXxQj0jlJcYR+YNFqpHbquWK4HDIOCAPPeUQeEJwJnX4PtPoxrYj6oJGDh2gp6TxQZGRLcFK9rhvGhVzl6agt9t4GKpt/gQnq7Za7ZBO/g1bvUR00NRH/cRNi0rXE/FlTSFv5JkgLk28FG9hoZV+uoLLh8AEFjSXYDzaYO/eTJa3SVqVQ5xSWrguc+CiZAdV4Neqmbyi/4XZcNb2mSVgIDeKjp4CFF6b5254TJFQTwdjOkOclUQmE6h2hdVTNoY7LDu2MZ+/3jz0k/rmZeYAAMa0sx8P9UXGDaX71wf8brFf4zmXbGFEiU1eFzb+oYKlYQXgK/QDG6BVrCmhizHIE6qHWHlZMDjiPgGQxle0OZLTjZtcu9RjUks4GgzTXl6TLhJmKx8Xs5ShMcDZFgYg9flUG2YGiRXc+EytcnzPCaNwJvolJdMhB5lqeXxMiRe6dLYw4eNsb8JgCJ1Y=";
         Debug.Print(hashedPassword);
 
-        Assert.That(hashedPassword == hashedPassword1);
+        Assert.That(hashedPassword, Is.EqualTo(hashedPassword1));
 
         var erg = PasswordHandler.ValidateHash(password, salt, hashedPassword, iterations);
 
-        //var decryptedPassword = PasswordHandler.Decrypt(encryptedPassword);
-
-        //Assert.That(!string.IsNullOrEmpty(encryptedPassword));
         Assert.That(erg);
     }
-
-        
 }
